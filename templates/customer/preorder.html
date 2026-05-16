@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% set active_nav = 'orders' %}
+{% block title %}Pre-Order · Dapur Hijrah{% endblock %}
+
+{% block header %}
+  {% include 'customer/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Pesan & Lacak</h1>
+  <p class="text-sm text-gray-500 mb-5">Atur pengambilan makananmu atau pantau pesanan yang sedang berjalan.</p>
+
+  <!-- Order Summary -->
+  <div class="bg-white rounded-2xl p-4 shadow-soft mb-4">
+    <h3 class="font-bold text-gray-900 mb-3">Ringkasan Pesanan ({{ summary.total_items }} item)</h3>
+    <div class="space-y-1 text-sm mb-3">
+      {% for item in summary['items'] %}
+        <div class="flex justify-between text-gray-700">
+          <span>{{ item.quantity }}x {{ item.name }}</span>
+          <span class="font-semibold">{{ item.subtotal | rupiah }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="flex justify-between font-bold pt-3 border-t border-gray-100">
+      <span>Total</span>
+      <span class="text-brand-600">{{ summary.total_price | rupiah }}</span>
+    </div>
+  </div>
+
+  <!-- Form Pre-Order -->
+  <form method="POST" class="bg-white rounded-2xl p-5 shadow-soft space-y-4 mb-4">
+    <div class="flex items-center gap-2 mb-1">
+      <i data-lucide="utensils" class="w-5 h-5 text-brand-600"></i>
+      <h3 class="font-bold text-gray-900">Form Pesan</h3>
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pemesan *</label>
+      <input type="text" name="customer_name" required placeholder="Masukkan nama lengkap"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">No HP / WhatsApp *</label>
+      <input type="tel" name="customer_contact" required placeholder="08xxxxxxxxxx"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Jadwal Ambil</label>
+      <input type="datetime-local" name="pickup_schedule"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran *</label>
+      <div class="grid grid-cols-3 gap-2">
+        {% for pay in [('TUNAI', 'banknote'), ('QRIS', 'qr-code'), ('COD', 'truck')] %}
+          <label class="cursor-pointer">
+            <input type="radio" name="payment_method" value="{{ pay[0] }}" {% if pay[0] == 'TUNAI' %}checked{% endif %} class="peer sr-only">
+            <div class="flex flex-col items-center gap-1 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-brand-500 peer-checked:bg-brand-50">
+              <i data-lucide="{{ pay[1] }}" class="w-5 h-5 text-gray-600"></i>
+              <span class="text-xs font-semibold">{{ pay[0] }}</span>
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan</label>
+      <textarea name="note" rows="2" placeholder="Contoh: kurangin gulanya"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-2xl">
+      Buat Pesanan Sekarang
+    </button>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+  {% include 'customer/_bottom_nav.html' %}
+{% endblock %}

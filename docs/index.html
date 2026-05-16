@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dokumentasi Refactor — Dapur Hijrah (Flask + Vercel + Neon)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac',
+            400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d',
+            800: '#166534', 900: '#14532d'
+          },
+          cream: '#faf7f0',
+          ink: '#1a1a1a'
+        },
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+  .code-block {
+    background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem;
+    border-radius: 0.75rem; overflow-x: auto; font-size: 0.85rem;
+    line-height: 1.6; border: 1px solid #1e293b;
+  }
+  .code-block .comment { color: #64748b; }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #86efac; }
+  .code-block .number { color: #fbbf24; }
+  .toc-link {
+    display: block; padding: 0.4rem 0.75rem; border-left: 2px solid transparent;
+    color: #64748b; font-size: 0.875rem; transition: all 0.15s;
+  }
+  .toc-link:hover { color: #16a34a; border-left-color: #86efac; background: #f0fdf4; }
+  .toc-link.active { color: #15803d; border-left-color: #16a34a; background: #f0fdf4; font-weight: 600; }
+  .file-card { transition: all 0.2s; }
+  .file-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -10px rgba(0,0,0,0.1); }
+  .step-num {
+    width: 2rem; height: 2rem; border-radius: 9999px; background: #16a34a;
+    color: white; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; font-size: 0.875rem;
+  }
+  .anchor-target { scroll-margin-top: 5rem; }
+  @media print { aside, .no-print { display: none !important; } main { width: 100% !important; } }
+</style>
+</head>
+<body class="bg-cream text-ink">
+
+<!-- Top Nav -->
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-40 no-print">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold">
+        🥥
+      </div>
+      <div>
+        <p class="font-bold text-sm">Dokumentasi Refactor</p>
+        <p class="text-xs text-gray-500">Dapur Hijrah — Es Teler App</p>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-2 text-xs">
+      <span class="px-2.5 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">Flask</span>
+      <span class="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">Vercel</span>
+      <span class="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">Neon PostgreSQL</span>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 py-8 flex gap-8">
+
+  <!-- Sidebar TOC -->
+  <aside class="w-64 flex-shrink-0 hidden lg:block">
+    <div class="sticky top-20">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">Daftar Isi</p>
+      <nav class="space-y-0.5">
+        <a href="#overview" class="toc-link">1. Overview</a>
+        <a href="#problems" class="toc-link">2. Masalah di Code Lama</a>
+        <a href="#architecture" class="toc-link">3. Arsitektur Baru</a>
+        <a href="#files-changed" class="toc-link">4. File yang Direvisi</a>
+        <a href="#setup-neon" class="toc-link">5. Setup Neon</a>
+        <a href="#setup-vercel" class="toc-link">6. Setup Vercel</a>
+        <a href="#local-dev" class="toc-link">7. Test Lokal</a>
+        <a href="#screens" class="toc-link">8. Preview Tampilan</a>
+        <a href="#troubleshooting" class="toc-link">9. Troubleshooting</a>
+        <a href="#sdd-mapping" class="toc-link">10. Mapping ke SDD</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 min-w-0">
+
+    <!-- Hero -->
+    <header class="mb-12">
+      <p class="text-brand-600 font-semibold text-sm mb-2">📦 KELOMPOK 4 — TELKOM UNIVERSITY</p>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">Refactor Es Teler App</h1>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        Dokumentasi lengkap proses refactoring website pemesanan UMKM Es Teler ke arsitektur
+        <strong>Flask + Vercel Serverless + Neon PostgreSQL</strong>, mengikuti spesifikasi SDD revisi
+        dan desain Figma mobile-first "Dapur Hijrah".
+      </p>
+
+      <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <p class="text-2xl font-bold text-brand-600">23</p>
+          <p class="text-xs text-gray-500">File direfactor</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <p class="text-2xl font-bold text-brand-600">10</p>
+          <p class="text-xs text-gray-500">Bug kritis diperbaiki</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <p class="text-2xl font-bold text-brand-600">7</p>
+          <p class="text-xs text-gray-500">Tabel database</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <p class="text-2xl font-bold text-brand-600">2</p>
+          <p class="text-xs text-gray-500">Sisi user (Customer + Admin)</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. OVERVIEW -->
+    <section id="overview" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">1</span> Overview
+      </h2>
+      <div class="prose max-w-none">
+        <p class="text-gray-700 leading-relaxed mb-4">
+          Project ini awalnya dibangun dengan Flask + SQL Server dan di-deploy via Docker. Untuk efisiensi
+          biaya dan kemudahan deployment, sistem di-refactor menjadi <strong>serverless di Vercel</strong> dengan
+          database <strong>Neon PostgreSQL</strong> (gratis 0.5 GB, scale-to-zero, auto-suspend).
+        </p>
+
+        <h3 class="text-lg font-semibold mt-6 mb-3">🎯 Goals Refactor</h3>
+        <ul class="list-disc pl-5 space-y-2 text-gray-700">
+          <li><strong>Performa lebih cepat</strong> — query optimization, eager loading, indexing</li>
+          <li><strong>Sesuai SDD final</strong> — tambah field <code class="px-1.5 py-0.5 bg-gray-100 rounded text-sm">payment_method</code>, <code class="px-1.5 py-0.5 bg-gray-100 rounded text-sm">order_source</code>, <code class="px-1.5 py-0.5 bg-gray-100 rounded text-sm">expires_at</code>, status "siap"</li>
+          <li><strong>Match desain Figma</strong> — UI mobile-first, hijau "Dapur Hijrah", bottom nav</li>
+          <li><strong>Siap serverless</strong> — entry point Vercel, connection pooling, env config</li>
+          <li><strong>Maintainable</strong> — service layer pattern, blueprint separation, DRY</li>
+        </ul>
+
+        <h3 class="text-lg font-semibold mt-6 mb-3">🛠️ Tech Stack Final</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm bg-white rounded-lg overflow-hidden border border-gray-200">
+            <thead class="bg-gray-50">
+              <tr class="text-left">
+                <th class="px-4 py-3 font-semibold">Layer</th>
+                <th class="px-4 py-3 font-semibold">Tech</th>
+                <th class="px-4 py-3 font-semibold">Alasan</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr><td class="px-4 py-3 font-medium">Framework</td><td class="px-4 py-3"><code>Flask 3.0</code></td><td class="px-4 py-3 text-gray-600">Sesuai SDD, ringan untuk serverless</td></tr>
+              <tr><td class="px-4 py-3 font-medium">ORM</td><td class="px-4 py-3"><code>SQLAlchemy 2.0</code></td><td class="px-4 py-3 text-gray-600">Standar industri, type-safe</td></tr>
+              <tr><td class="px-4 py-3 font-medium">Auth</td><td class="px-4 py-3"><code>Flask-Login + bcrypt</code></td><td class="px-4 py-3 text-gray-600">Sesuai SDD section 3.2.1</td></tr>
+              <tr><td class="px-4 py-3 font-medium">Database</td><td class="px-4 py-3"><code>Neon PostgreSQL</code></td><td class="px-4 py-3 text-gray-600">Free tier, serverless-friendly</td></tr>
+              <tr><td class="px-4 py-3 font-medium">Frontend</td><td class="px-4 py-3"><code>Jinja2 + TailwindCSS CDN</code></td><td class="px-4 py-3 text-gray-600">Server-side render, no build step</td></tr>
+              <tr><td class="px-4 py-3 font-medium">Icons</td><td class="px-4 py-3"><code>Lucide</code></td><td class="px-4 py-3 text-gray-600">Konsisten dengan desain Figma</td></tr>
+              <tr><td class="px-4 py-3 font-medium">Deploy</td><td class="px-4 py-3"><code>Vercel (region sin1)</code></td><td class="px-4 py-3 text-gray-600">Singapore, latency rendah untuk Indonesia</td></tr>
+              <tr><td class="px-4 py-3 font-medium">AI Reco</td><td class="px-4 py-3"><code>Rule-based</code></td><td class="px-4 py-3 text-gray-600">Cepat, no cold start; upgrade ke Decision Tree nanti</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MASALAH DI CODE LAMA -->
+    <section id="problems" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">2</span> Masalah di Code Lama
+      </h2>
+      <p class="text-gray-700 mb-6">
+        Analisis terhadap repo <a href="https://github.com/yudhasw/esteler-app" target="_blank" class="text-brand-600 underline">github.com/yudhasw/esteler-app</a>
+        menemukan <strong>10 bug kritis</strong> yang harus diperbaiki sebelum deploy:
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-3">
+        <!-- Bug 1 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
+            <div>
+              <h4 class="font-semibold text-red-900 mb-1">Model mismatch</h4>
+              <p class="text-sm text-red-800">Routes <code class="bg-red-100 px-1 rounded">buyer.py</code> &amp; <code class="bg-red-100 px-1 rounded">seller.py</code> masih pakai model lama (<code class="bg-red-100 px-1 rounded">Seller</code>, <code class="bg-red-100 px-1 rounded">is_available</code>) padahal models.py udah baru. Bakal crash saat runtime.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 2 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</div>
+            <div>
+              <h4 class="font-semibold text-red-900 mb-1">User class tidak extend UserMixin</h4>
+              <p class="text-sm text-red-800">Flask-Login butuh <code class="bg-red-100 px-1 rounded">UserMixin</code> untuk method <code class="bg-red-100 px-1 rounded">is_authenticated</code>, <code class="bg-red-100 px-1 rounded">get_id()</code>. Login pasti error.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 3 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</div>
+            <div>
+              <h4 class="font-semibold text-red-900 mb-1">cart_service.get_summary() terpotong</h4>
+              <p class="text-sm text-red-800">Code berhenti di tengah: <code class="bg-red-100 px-1 rounded">menu = Menu.query</code>. Tidak ada return value, akan SyntaxError.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 4 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</div>
+            <div>
+              <h4 class="font-semibold text-red-900 mb-1">File services hilang</h4>
+              <p class="text-sm text-red-800"><code class="bg-red-100 px-1 rounded">analytics_service.py</code> dan <code class="bg-red-100 px-1 rounded">recommendation_service.py</code> diimport tapi tidak ada filenya. ImportError saat startup.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 5 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</div>
+            <div>
+              <h4 class="font-semibold text-red-900 mb-1">Template kosong (0 byte)</h4>
+              <p class="text-sm text-red-800"><code class="bg-red-100 px-1 rounded">base.html</code>, <code class="bg-red-100 px-1 rounded">dashboard.html</code>, <code class="bg-red-100 px-1 rounded">login.html</code>, <code class="bg-red-100 px-1 rounded">menu.html</code> semua file kosong. Halaman blank.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 6 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">6</div>
+            <div>
+              <h4 class="font-semibold text-amber-900 mb-1">Blueprint tidak diregister</h4>
+              <p class="text-sm text-amber-800"><code class="bg-amber-100 px-1 rounded">buyer_bp</code> dan <code class="bg-amber-100 px-1 rounded">seller_bp</code> didefine tapi tidak di-register di <code class="bg-amber-100 px-1 rounded">app.py</code>. Route-nya tidak akan accessible.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 7 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">7</div>
+            <div>
+              <h4 class="font-semibold text-amber-900 mb-1">N+1 query problem</h4>
+              <p class="text-sm text-amber-800">Cart loop akses <code class="bg-amber-100 px-1 rounded">item.menu</code> = 1 query per item. Untuk 10 item = 11 query. Lambat di serverless.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 8 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">8</div>
+            <div>
+              <h4 class="font-semibold text-amber-900 mb-1">SECRET_KEY default insecure</h4>
+              <p class="text-sm text-amber-800">Pakai <code class="bg-amber-100 px-1 rounded">'dev-secret-key'</code> sebagai fallback. Bahaya kalau production lupa set env var.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 9 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">9</div>
+            <div>
+              <h4 class="font-semibold text-amber-900 mb-1">Field SDD belum ada</h4>
+              <p class="text-sm text-amber-800">Model belum punya <code class="bg-amber-100 px-1 rounded">payment_method</code>, <code class="bg-amber-100 px-1 rounded">order_source</code>, <code class="bg-amber-100 px-1 rounded">expires_at</code>, status "siap", walk-in order, dll.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug 10 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">10</div>
+            <div>
+              <h4 class="font-semibold text-amber-900 mb-1">Belum siap Vercel</h4>
+              <p class="text-sm text-amber-800">Tidak ada <code class="bg-amber-100 px-1 rounded">vercel.json</code>, pakai Gunicorn (untuk traditional server), connection pool tidak dikonfigurasi untuk serverless.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ARSITEKTUR BARU -->
+    <section id="architecture" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">3</span> Arsitektur Baru
+      </h2>
+
+      <p class="text-gray-700 mb-4">
+        Sistem dibagi 2 sisi user sesuai SDD: <strong>Customer (tanpa login, session-based)</strong> dan
+        <strong>Admin (Flask-Login + bcrypt)</strong>.
+      </p>
+
+      <!-- Architecture Diagram (ASCII art) -->
+      <div class="bg-gray-900 text-gray-100 rounded-xl p-6 overflow-x-auto mb-6">
+<pre class="text-xs leading-relaxed"><code>┌──────────────────────────────────────────────────────────────┐
+│                      VERCEL SERVERLESS (sin1)                │
+│                                                              │
+│   ┌──────────────────────────────────────────────────────┐   │
+│   │  PRESENTATION LAYER (Jinja2 Templates)              │   │
+│   │  ┌────────────────────┬──────────────────────────┐  │   │
+│   │  │  CUSTOMER SIDE     │  ADMIN SIDE              │  │   │
+│   │  │  - Home            │  - Login                 │  │   │
+│   │  │  - Menu            │  - Dashboard             │  │   │
+│   │  │  - Recommendation  │  - Kelola Menu (CRUD)    │  │   │
+│   │  │  - Cart            │  - Kelola Order          │  │   │
+│   │  │  - Pre-Order       │  - Walk-in Order         │  │   │
+│   │  │  - Track Status    │  - Laporan PDF/CSV       │  │   │
+│   │  └────────────────────┴──────────────────────────┘  │   │
+│   └──────────────────────────────────────────────────────┘   │
+│                            ▼                                 │
+│   ┌──────────────────────────────────────────────────────┐   │
+│   │  ROUTES (Flask Blueprints)                          │   │
+│   │   auth_bp  │  customer_bp  │  admin_bp              │   │
+│   └──────────────────────────────────────────────────────┘   │
+│                            ▼                                 │
+│   ┌──────────────────────────────────────────────────────┐   │
+│   │  SERVICE LAYER (Business Logic)                     │   │
+│   │   AuthService    │  MenuService    │  CartService   │   │
+│   │   OrderService   │  AnalyticsService                │   │
+│   │   RecommendationService                              │   │
+│   └──────────────────────────────────────────────────────┘   │
+│                            ▼                                 │
+│   ┌──────────────────────────────────────────────────────┐   │
+│   │  MODEL LAYER (SQLAlchemy ORM)                       │   │
+│   │   User │ Menu │ Order │ OrderItem │ Cart            │   │
+│   │   CartItem │ Recommendation                          │   │
+│   └──────────────────────────────────────────────────────┘   │
+└────────────────────────────┬─────────────────────────────────┘
+                             ▼ (psycopg2 + pooled connection)
+              ┌──────────────────────────────────┐
+              │   NEON POSTGRESQL (eu-central)   │
+              │   - Auto-suspend after 5 min     │
+              │   - Connection pooling enabled   │
+              │   - 0.5 GB free storage          │
+              └──────────────────────────────────┘
+</code></pre>
+      </div>
+
+      <h3 class="text-lg font-semibold mt-6 mb-3">📂 Struktur Folder Final</h3>
+      <div class="code-block">
+<pre>esteler-app/
+├── api/
+│   └── index.py              <span class="comment"># Entry point Vercel (WSGI handler)</span>
+├── routes/
+│   ├── auth.py               <span class="comment"># Login/logout/reset password</span>
+│   ├── customer.py           <span class="comment"># Halaman pembeli (tanpa login)</span>
+│   └── admin.py              <span class="comment"># Halaman penjual (login required)</span>
+├── services/
+│   ├── auth_service.py
+│   ├── menu_service.py
+│   ├── cart_service.py
+│   ├── order_service.py
+│   ├── analytics_service.py  <span class="comment"># BARU - sesuai SDD 3.2.6</span>
+│   └── recommendation_service.py  <span class="comment"># BARU - sesuai SDD 3.2.5</span>
+├── templates/
+│   ├── base.html             <span class="comment"># Layout mobile-first</span>
+│   ├── auth/                 <span class="comment"># Login + forgot password</span>
+│   ├── admin/                <span class="comment"># Dashboard, menu, orders, walk-in</span>
+│   └── customer/             <span class="comment"># Home, menu, cart, preorder, track</span>
+├── static/
+├── models.py                 <span class="comment"># 7 tabel sesuai SDD revisi</span>
+├── config.py                 <span class="comment"># Connection pooling, security</span>
+├── app.py                    <span class="comment"># Entry point dev lokal</span>
+├── seed.py                   <span class="comment"># Sample data (8 menu)</span>
+├── vercel.json               <span class="comment"># Config deployment Vercel</span>
+├── requirements.txt
+└── .env.example              <span class="comment"># Template env vars</span></pre>
+      </div>
+    </section>
+
+    <!-- 4. FILE YANG DIREVISI -->
+    <section id="files-changed" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">4</span> File yang Direvisi
+      </h2>
+
+      <div class="space-y-3">
+        <!-- models.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📋</span>
+              <code class="font-semibold text-base">models.py</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIREVISI</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa direvisi:</strong> Fix Bug #2, #9</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li><code class="bg-gray-100 px-1 rounded">User</code> extend <code class="bg-gray-100 px-1 rounded">UserMixin</code> → Flask-Login bisa kerja</li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">orders.payment_method</code> (QRIS/TUNAI/COD)</li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">orders.order_source</code> (ONLINE_PREORDER/WALKIN)</li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">orders.updated_at</code>, <code class="bg-gray-100 px-1 rounded">menus.updated_at</code></li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">menus.is_favorite</code> (sesuai SDD 5.2.2)</li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">recommendations.expires_at</code> untuk cache invalidation</li>
+            <li>Tambah status order <strong>"siap"</strong> (sebelumnya cuma menunggu/memasak/selesai)</li>
+            <li>Indexing pada <code class="bg-gray-100 px-1 rounded">session_id</code>, <code class="bg-gray-100 px-1 rounded">order_code</code>, <code class="bg-gray-100 px-1 rounded">status</code></li>
+          </ul>
+        </div>
+
+        <!-- config.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚙️</span>
+              <code class="font-semibold text-base">config.py</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIREVISI</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa direvisi:</strong> Fix Bug #8, #10</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Hapus default insecure <code class="bg-gray-100 px-1 rounded">SECRET_KEY</code> → wajib di env var</li>
+            <li>Tambah <code class="bg-gray-100 px-1 rounded">SQLALCHEMY_ENGINE_OPTIONS</code> connection pooling untuk Neon</li>
+            <li><code class="bg-gray-100 px-1 rounded">pool_pre_ping=True</code> → handle Neon auto-suspend</li>
+            <li><code class="bg-gray-100 px-1 rounded">pool_recycle=300</code> → connection refresh tiap 5 menit</li>
+            <li>Auto-detect <code class="bg-gray-100 px-1 rounded">sslmode=require</code> untuk Neon SSL</li>
+          </ul>
+        </div>
+
+        <!-- services/cart_service.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🛒</span>
+              <code class="font-semibold text-base">services/cart_service.py</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIREVISI</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa direvisi:</strong> Fix Bug #3, #7</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Lengkapi <code class="bg-gray-100 px-1 rounded">get_summary()</code> yang terpotong</li>
+            <li>Pakai <code class="bg-gray-100 px-1 rounded">joinedload(CartItem.menu)</code> → 1 query bukan N+1</li>
+            <li>Validasi quantity (tidak boleh ≤ 0)</li>
+            <li>Auto-cleanup cart kosong</li>
+          </ul>
+        </div>
+
+        <!-- services/analytics_service.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-brand-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📊</span>
+              <code class="font-semibold text-base">services/analytics_service.py</code>
+            </div>
+            <span class="px-2 py-1 bg-brand-100 text-brand-700 text-xs rounded font-medium">FILE BARU</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa dibuat:</strong> Fix Bug #4 (file diimport tapi tidak ada)</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Implementasi sesuai SDD 3.2.6 — dashboard analytics</li>
+            <li><code class="bg-gray-100 px-1 rounded">get_dashboard_summary()</code> — total revenue, orders, customers</li>
+            <li><code class="bg-gray-100 px-1 rounded">get_top_menus()</code> — menu terlaris dari <code class="bg-gray-100 px-1 rounded">sold_count</code></li>
+            <li><code class="bg-gray-100 px-1 rounded">get_weekly_revenue()</code> — chart 7 hari terakhir</li>
+            <li><code class="bg-gray-100 px-1 rounded">get_source_distribution()</code> — online vs walk-in</li>
+            <li><code class="bg-gray-100 px-1 rounded">get_busiest_hours()</code> — jam paling ramai (SDD revisi)</li>
+            <li>Pakai SQL aggregation (SUM, COUNT, GROUP BY) bukan loop Python</li>
+          </ul>
+        </div>
+
+        <!-- services/recommendation_service.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-brand-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🤖</span>
+              <code class="font-semibold text-base">services/recommendation_service.py</code>
+            </div>
+            <span class="px-2 py-1 bg-brand-100 text-brand-700 text-xs rounded font-medium">FILE BARU</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa dibuat:</strong> Fix Bug #4</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Implementasi sesuai SDD 3.2.5 — AI Recommendation</li>
+            <li><strong>Saat ini:</strong> rule-based scoring (kategori, rating, sold_count)</li>
+            <li><strong>Cache:</strong> simpan ke tabel <code class="bg-gray-100 px-1 rounded">recommendations</code> dengan <code class="bg-gray-100 px-1 rounded">expires_at</code></li>
+            <li><strong>Future:</strong> Tinggal swap <code class="bg-gray-100 px-1 rounded">calculate_match_score()</code> ke Decision Tree scikit-learn</li>
+            <li><strong>Fallback:</strong> ke best seller kalau data kurang</li>
+          </ul>
+        </div>
+
+        <!-- routes/customer.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🛍️</span>
+              <code class="font-semibold text-base">routes/customer.py</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIREVISI</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa direvisi:</strong> Fix Bug #1, #6</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Rewrite total — pakai model baru</li>
+            <li>Tambah route <code class="bg-gray-100 px-1 rounded">/track/&lt;code&gt;</code> untuk tracking</li>
+            <li>Tambah session_id auto-create di middleware</li>
+            <li>Form preorder support payment_method</li>
+          </ul>
+        </div>
+
+        <!-- routes/admin.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">👨‍💼</span>
+              <code class="font-semibold text-base">routes/admin.py</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIREVISI</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa direvisi:</strong> Fix Bug #1, #6, support fitur baru SDD</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Rewrite total — pakai model baru</li>
+            <li>Tambah route <code class="bg-gray-100 px-1 rounded">/admin/orders/walkin</code> untuk walk-in order (SDD revisi)</li>
+            <li>Status update flow: menunggu → memasak → siap → selesai</li>
+            <li>Auto-increment <code class="bg-gray-100 px-1 rounded">sold_count</code> saat status = selesai</li>
+          </ul>
+        </div>
+
+        <!-- templates/base.html -->
+        <div class="file-card bg-white rounded-lg p-5 border border-gray-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🎨</span>
+              <code class="font-semibold text-base">templates/*.html (semua)</code>
+            </div>
+            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-medium">DIBUAT ULANG</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa dibuat ulang:</strong> Fix Bug #5 (template kosong)</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Mobile-first design (max-width 480px) sesuai Figma</li>
+            <li>Theme hijau "Dapur Hijrah" dengan Tailwind config</li>
+            <li>Bottom nav 3 menu (Home/Menu/Orders)</li>
+            <li>Lucide icons untuk konsistensi</li>
+            <li>Auto-refresh tiap 30 detik di track page</li>
+            <li>17 file template baru</li>
+          </ul>
+        </div>
+
+        <!-- api/index.py -->
+        <div class="file-card bg-white rounded-lg p-5 border border-brand-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🚀</span>
+              <code class="font-semibold text-base">api/index.py</code>
+            </div>
+            <span class="px-2 py-1 bg-brand-100 text-brand-700 text-xs rounded font-medium">FILE BARU</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa dibuat:</strong> Fix Bug #10 — Vercel butuh entry point khusus</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Vercel cari <code class="bg-gray-100 px-1 rounded">api/</code> folder secara default</li>
+            <li>Path template explicit (Vercel filesystem read-only kecuali /tmp)</li>
+            <li>Export <code class="bg-gray-100 px-1 rounded">app</code> sebagai WSGI handler</li>
+          </ul>
+        </div>
+
+        <!-- vercel.json -->
+        <div class="file-card bg-white rounded-lg p-5 border border-brand-200">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚡</span>
+              <code class="font-semibold text-base">vercel.json</code>
+            </div>
+            <span class="px-2 py-1 bg-brand-100 text-brand-700 text-xs rounded font-medium">FILE BARU</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-2"><strong>Kenapa dibuat:</strong> Fix Bug #10</p>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Region <code class="bg-gray-100 px-1 rounded">sin1</code> (Singapore) → latency rendah dari Indonesia</li>
+            <li>Routing static files via <code class="bg-gray-100 px-1 rounded">/static/*</code></li>
+            <li>Builder Python <code class="bg-gray-100 px-1 rounded">@vercel/python</code></li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. SETUP NEON -->
+    <section id="setup-neon" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">5</span> Setup Neon PostgreSQL
+      </h2>
+
+      <div class="space-y-5">
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            Daftar Neon
+          </h3>
+          <p class="text-sm text-gray-700 mb-2">Buka <a href="https://neon.com" target="_blank" class="text-brand-600 underline">neon.com</a> → sign up pakai GitHub (gratis 0.5 GB).</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            Buat Project Baru
+          </h3>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Project name: <code class="bg-gray-100 px-1 rounded">esteler-app</code></li>
+            <li>Region: <strong>AWS Singapore (ap-southeast-1)</strong> ← penting, deket Vercel sin1</li>
+            <li>PostgreSQL version: 16 (default)</li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            Copy Connection String (POOLED!)
+          </h3>
+          <p class="text-sm text-gray-700 mb-3">Di dashboard, klik <strong>"Connection Details"</strong>. <strong class="text-red-600">PENTING:</strong> aktifkan toggle <strong>"Pooled connection"</strong>.</p>
+          <div class="code-block text-xs">
+<pre><span class="comment"># Format pooled (untuk serverless Vercel)</span>
+postgresql://user:pass@ep-xxx-<span class="string">pooler</span>.ap-southeast-1.aws.neon.tech/dbname?sslmode=require
+
+<span class="comment"># Format direct (untuk migrasi/seeding)</span>
+postgresql://user:pass@ep-xxx.ap-southeast-1.aws.neon.tech/dbname?sslmode=require</pre>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">⚠️ Pooled string punya <code>-pooler</code> di hostname.</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+            Jalankan Migration
+          </h3>
+          <div class="code-block text-xs">
+<pre><span class="comment"># Set env var dengan DIRECT connection (bukan pooled)</span>
+<span class="keyword">export</span> DATABASE_URL=<span class="string">"postgresql://...neon.tech/dbname?sslmode=require"</span>
+
+<span class="comment"># Run migration</span>
+flask db upgrade
+
+<span class="comment"># Seed sample data (admin + 8 menu)</span>
+python seed.py</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SETUP VERCEL -->
+    <section id="setup-vercel" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">6</span> Setup Vercel
+      </h2>
+
+      <div class="space-y-5">
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            Push ke GitHub
+          </h3>
+          <div class="code-block text-xs">
+<pre>git add .
+git commit -m <span class="string">"refactor: ready for vercel deploy"</span>
+git push origin main</pre>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            Import Project di Vercel
+          </h3>
+          <ul class="text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Buka <a href="https://vercel.com" target="_blank" class="text-brand-600 underline">vercel.com</a> → sign in dengan GitHub</li>
+            <li>"Add New Project" → pilih repo <code class="bg-gray-100 px-1 rounded">esteler-app</code></li>
+            <li>Framework Preset: <strong>Other</strong> (Vercel auto-detect via <code>vercel.json</code>)</li>
+            <li>Root directory: <code class="bg-gray-100 px-1 rounded">./</code> (default)</li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            Set Environment Variables
+          </h3>
+          <p class="text-sm text-gray-700 mb-3">Di Settings → Environment Variables, tambahkan:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm bg-gray-50 rounded-lg">
+              <thead><tr class="text-left border-b"><th class="px-3 py-2 font-semibold">Key</th><th class="px-3 py-2 font-semibold">Value</th></tr></thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr><td class="px-3 py-2 font-mono">DATABASE_URL</td><td class="px-3 py-2 font-mono text-xs">postgresql://...<strong>pooler</strong>...neon.tech/... <span class="text-red-600">(POOLED!)</span></td></tr>
+                <tr><td class="px-3 py-2 font-mono">SECRET_KEY</td><td class="px-3 py-2 font-mono text-xs">generate-random-32-chars-string</td></tr>
+                <tr><td class="px-3 py-2 font-mono">FLASK_ENV</td><td class="px-3 py-2 font-mono text-xs">production</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">💡 Generate SECRET_KEY: <code>python -c "import secrets; print(secrets.token_hex(32))"</code></p>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+            Deploy!
+          </h3>
+          <p class="text-sm text-gray-700">Klik tombol <strong>Deploy</strong>. Vercel akan:</p>
+          <ol class="text-sm text-gray-700 space-y-1 list-decimal pl-5 mt-2">
+            <li>Install dependencies dari <code class="bg-gray-100 px-1 rounded">requirements.txt</code></li>
+            <li>Build Python runtime untuk <code class="bg-gray-100 px-1 rounded">api/index.py</code></li>
+            <li>Route semua request ke Flask app</li>
+            <li>Generate URL: <code class="bg-gray-100 px-1 rounded">esteler-app.vercel.app</code></li>
+          </ol>
+          <p class="text-sm text-gray-700 mt-3">⏱️ Build time: <strong>~45 detik</strong> pertama, ~15 detik selanjutnya.</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <h3 class="font-semibold mb-2 text-amber-900">⚠️ Catatan Vercel Free Tier</h3>
+          <ul class="text-sm text-amber-800 space-y-1 list-disc pl-5">
+            <li>Max execution: <strong>10 detik</strong> per request (cocok untuk Es Teler)</li>
+            <li>Cold start: ~1-2 detik (pertama akses setelah idle)</li>
+            <li>Bandwidth: 100 GB/bulan (lebih dari cukup)</li>
+            <li>Custom domain: <strong>gratis</strong> (bisa connect domain sendiri)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. TEST LOKAL -->
+    <section id="local-dev" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">7</span> Test Lokal
+      </h2>
+
+      <div class="code-block text-xs">
+<pre><span class="comment"># 1. Clone repo</span>
+git clone https://github.com/yudhasw/esteler-app.git
+<span class="keyword">cd</span> esteler-app
+
+<span class="comment"># 2. Buat virtual environment</span>
+python -m venv venv
+<span class="keyword">source</span> venv/bin/activate  <span class="comment"># Mac/Linux</span>
+venv\Scripts\activate     <span class="comment"># Windows</span>
+
+<span class="comment"># 3. Install dependencies</span>
+pip install -r requirements.txt
+
+<span class="comment"># 4. Setup .env</span>
+cp .env.example .env
+<span class="comment"># Edit .env, isi DATABASE_URL dari Neon (direct connection)</span>
+
+<span class="comment"># 5. Migrate database</span>
+flask db init    <span class="comment"># sekali aja</span>
+flask db migrate -m <span class="string">"initial"</span>
+flask db upgrade
+
+<span class="comment"># 6. Seed sample data</span>
+python seed.py
+<span class="comment"># Default admin: username=admin, password=admin123</span>
+
+<span class="comment"># 7. Run dev server</span>
+python app.py
+<span class="comment"># → http://localhost:5000</span></pre>
+      </div>
+
+      <div class="mt-6 grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 class="font-semibold mb-2 flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-brand-600"></i>
+            Test Sisi Customer
+          </h4>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>→ <code class="bg-gray-100 px-1 rounded">localhost:5000/</code> (home)</li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/menu</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/cart</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/preorder</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/track</code></li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-gray-200">
+          <h4 class="font-semibold mb-2 flex items-center gap-2">
+            <i data-lucide="briefcase" class="w-4 h-4 text-brand-600"></i>
+            Test Sisi Admin
+          </h4>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>→ <code class="bg-gray-100 px-1 rounded">/login</code> (admin/admin123)</li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/admin/dashboard</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/admin/menu</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/admin/orders</code></li>
+            <li>→ <code class="bg-gray-100 px-1 rounded">/admin/orders/walkin</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. PREVIEW TAMPILAN -->
+    <section id="screens" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">8</span> Preview Tampilan
+      </h2>
+      <p class="text-gray-700 mb-6">Mock preview halaman utama sesuai desain Figma "Dapur Hijrah":</p>
+
+      <div class="grid md:grid-cols-3 gap-4">
+        <!-- Mock Customer Home -->
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div class="bg-brand-600 px-4 py-6 text-white">
+            <p class="text-xs opacity-80">Selamat datang di</p>
+            <p class="font-bold text-lg">Dapur Hijrah 🥥</p>
+          </div>
+          <div class="p-4">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Best Seller</p>
+            <div class="space-y-2">
+              <div class="flex items-center gap-3 p-2 bg-cream rounded-lg">
+                <div class="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center text-2xl">🥥</div>
+                <div class="flex-1 text-xs">
+                  <p class="font-semibold">Es Teler Spesial</p>
+                  <p class="text-brand-600 font-bold">Rp 18.000</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2 bg-cream rounded-lg">
+                <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl">🍮</div>
+                <div class="flex-1 text-xs">
+                  <p class="font-semibold">Es Teler Durian</p>
+                  <p class="text-brand-600 font-bold">Rp 22.000</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="border-t flex justify-around py-2 text-xs">
+            <span class="text-brand-600">🏠</span>
+            <span class="text-gray-400">📋</span>
+            <span class="text-gray-400">📦</span>
+          </div>
+          <div class="px-4 py-2 bg-gray-50 text-center text-xs text-gray-500 font-medium">Customer Home</div>
+        </div>
+
+        <!-- Mock Admin Dashboard -->
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div class="bg-white px-4 py-3 border-b">
+            <p class="font-bold">Dashboard</p>
+            <p class="text-xs text-gray-500">Halo, Admin</p>
+          </div>
+          <div class="p-4 space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-brand-50 p-2 rounded-lg">
+                <p class="text-xs text-gray-600">Pendapatan</p>
+                <p class="font-bold text-brand-700 text-sm">Rp 1.2 jt</p>
+              </div>
+              <div class="bg-blue-50 p-2 rounded-lg">
+                <p class="text-xs text-gray-600">Pesanan</p>
+                <p class="font-bold text-blue-700 text-sm">47</p>
+              </div>
+            </div>
+            <div class="bg-amber-50 p-2 rounded-lg text-xs">
+              <p class="font-semibold mb-1">Online vs Walk-in</p>
+              <div class="flex gap-1">
+                <div class="bg-brand-500 h-2 rounded" style="width: 65%"></div>
+                <div class="bg-amber-500 h-2 rounded" style="width: 35%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 py-2 bg-gray-50 text-center text-xs text-gray-500 font-medium">Admin Dashboard</div>
+        </div>
+
+        <!-- Mock Track Status -->
+        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div class="bg-white px-4 py-3 border-b">
+            <p class="font-bold text-sm">ORD-20260516-A1B2</p>
+            <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Memasak</span>
+          </div>
+          <div class="p-4 space-y-2">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center text-white">✓</span>
+              <span>Diterima</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center text-white">✓</span>
+              <span class="font-semibold">Disiapkan</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs opacity-50">
+              <span class="w-6 h-6 bg-gray-200 rounded-full"></span>
+              <span>Siap diambil</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs opacity-50">
+              <span class="w-6 h-6 bg-gray-200 rounded-full"></span>
+              <span>Selesai</span>
+            </div>
+          </div>
+          <div class="px-4 py-2 bg-gray-50 text-center text-xs text-gray-500 font-medium">Track Status</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. TROUBLESHOOTING -->
+    <section id="troubleshooting" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">9</span> Troubleshooting
+      </h2>
+
+      <div class="space-y-3">
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">❌ "FATAL: connection terminated unexpectedly"</summary>
+          <p class="mt-2 text-sm text-gray-700">Neon auto-suspend setelah 5 menit idle. Pastikan pakai <strong>pooled connection</strong> dan <code>pool_pre_ping=True</code> di config.py (sudah otomatis).</p>
+        </details>
+
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">❌ "ImportError: No module named 'app'" di Vercel</summary>
+          <p class="mt-2 text-sm text-gray-700">Pastikan file <code>api/index.py</code> ada dan import <code>app</code> dengan path relatif yang benar. Check struktur folder di section 3.</p>
+        </details>
+
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">❌ Template tidak ketemu di Vercel</summary>
+          <p class="mt-2 text-sm text-gray-700">Vercel filesystem read-only kecuali <code>/tmp</code>. Set <code>template_folder</code> explicit di <code>api/index.py</code> dengan absolute path.</p>
+        </details>
+
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">❌ Build fail "psycopg2 not found"</summary>
+          <p class="mt-2 text-sm text-gray-700">Pakai <code>psycopg2-binary</code> bukan <code>psycopg2</code> di requirements.txt. Yang binary udah include native libs.</p>
+        </details>
+
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">❌ Login redirect loop</summary>
+          <p class="mt-2 text-sm text-gray-700">Cek <code>User</code> extend <code>UserMixin</code>. Cek <code>SECRET_KEY</code> di-set (Flask butuh untuk session cookie).</p>
+        </details>
+
+        <details class="bg-white rounded-lg p-4 border border-gray-200">
+          <summary class="font-semibold cursor-pointer">⚡ Performance tips</summary>
+          <ul class="mt-2 text-sm text-gray-700 space-y-1 list-disc pl-5">
+            <li>Cold start lambat? → upgrade Vercel ke Pro untuk warm instances</li>
+            <li>Query lambat? → tambah index pada kolom yang sering di-filter</li>
+            <li>Image lambat load? → host di Vercel Blob / Cloudflare R2</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- 10. SDD MAPPING -->
+    <section id="sdd-mapping" class="anchor-target mb-16">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="step-num">10</span> Mapping ke SDD
+      </h2>
+
+      <p class="text-gray-700 mb-4">Tabel berikut menunjukkan korelasi antara module SDD dan implementasi code:</p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm bg-white rounded-lg overflow-hidden border border-gray-200">
+          <thead class="bg-gray-50">
+            <tr class="text-left">
+              <th class="px-4 py-3 font-semibold">SDD Module</th>
+              <th class="px-4 py-3 font-semibold">SDD Section</th>
+              <th class="px-4 py-3 font-semibold">File Implementasi</th>
+              <th class="px-4 py-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr>
+              <td class="px-4 py-3 font-medium">Authentication</td>
+              <td class="px-4 py-3 text-gray-500">3.2.1</td>
+              <td class="px-4 py-3"><code>auth_service.py</code> + <code>routes/auth.py</code></td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">✓ Lengkap</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Menu Management</td>
+              <td class="px-4 py-3 text-gray-500">3.2.2</td>
+              <td class="px-4 py-3"><code>menu_service.py</code> + <code>routes/admin.py</code></td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">✓ Lengkap</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Cart</td>
+              <td class="px-4 py-3 text-gray-500">3.2.3</td>
+              <td class="px-4 py-3"><code>cart_service.py</code> + <code>routes/customer.py</code></td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">✓ Lengkap</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Order Management</td>
+              <td class="px-4 py-3 text-gray-500">3.2.4</td>
+              <td class="px-4 py-3"><code>order_service.py</code> (support walk-in, payment)</td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">✓ Lengkap</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Recommendation (AI)</td>
+              <td class="px-4 py-3 text-gray-500">3.2.5</td>
+              <td class="px-4 py-3"><code>recommendation_service.py</code> (rule-based)</td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs">⚠ Rule-based dulu</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Analytics</td>
+              <td class="px-4 py-3 text-gray-500">3.2.6</td>
+              <td class="px-4 py-3"><code>analytics_service.py</code></td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs">✓ Lengkap</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium">Report (PDF/CSV)</td>
+              <td class="px-4 py-3 text-gray-500">3.2.7</td>
+              <td class="px-4 py-3">Belum (perlu ReportLab)</td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">○ Phase 2</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-5">
+        <h4 class="font-semibold mb-2 text-blue-900">💡 Catatan Penting</h4>
+        <p class="text-sm text-blue-800 leading-relaxed">
+          SDD asli menyebut deployment di <strong>Railway/Render/PythonAnywhere</strong> dengan Docker dan Gunicorn.
+          Kami memilih <strong>Vercel + Neon</strong> karena lebih cocok untuk skala UMKM (gratis, scale-to-zero,
+          tidak perlu maintain server). Refactor ini tetap mempertahankan struktur SDD (Three-Tier, Blueprint,
+          Service Layer), hanya beradaptasi dengan environment serverless.
+        </p>
+        <p class="text-sm text-blue-800 leading-relaxed mt-3">
+          <strong>Decision Tree (scikit-learn)</strong> sesuai SDD 3.2.5 belum diimplementasi karena butuh
+          dataset training yang cukup. Saat ini pakai rule-based scoring sebagai fallback (sesuai strategi
+          SDD: "fallback ke best seller jika dataset tidak mencukupi"). Tinggal swap function
+          <code>calculate_match_score()</code> nanti.
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-20 pt-8 border-t border-gray-200 text-center">
+      <p class="text-sm text-gray-500 mb-2">
+        Dibuat untuk <strong>Kelompok 4 — Computing Project</strong>
+      </p>
+      <p class="text-xs text-gray-400">
+        S-1 Informatika · Fakultas Informatika · Universitas Telkom · 2026
+      </p>
+      <p class="text-xs text-gray-400 mt-1">
+        Dr. Mahmud Dwi Sulistiyo, S.T., M.T. (Supervisor)
+      </p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Active TOC link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.toc-link');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 100) current = section.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink();
+
+  // Lucide icons
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+  script.onload = () => lucide.createIcons();
+  document.head.appendChild(script);
+</script>
+
+</body>
+</html>

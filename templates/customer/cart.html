@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% set active_nav = 'menu' %}
+{% block title %}Keranjang · Dapur Hijrah{% endblock %}
+
+{% block header %}
+  {% include 'customer/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Keranjang Saya</h1>
+  <p class="text-sm text-gray-500 mb-5">{{ summary.total_items }} item dalam keranjang</p>
+
+  {% if summary.is_empty %}
+    <div class="bg-white rounded-2xl p-8 text-center shadow-soft">
+      <i data-lucide="shopping-cart" class="w-16 h-16 mx-auto text-gray-300 mb-3"></i>
+      <p class="font-semibold text-gray-700 mb-1">Keranjang masih kosong</p>
+      <p class="text-sm text-gray-500 mb-4">Yuk pilih menu favoritmu!</p>
+      <a href="{{ url_for('customer.menu_list') }}"
+         class="inline-block bg-brand-500 text-white font-bold px-6 py-2.5 rounded-xl">
+        Lihat Menu
+      </a>
+    </div>
+  {% else %}
+    <!-- Items -->
+    <div class="space-y-3 mb-5">
+      {% for item in summary['items'] %}
+      <div class="bg-white rounded-2xl p-3 shadow-soft flex items-center gap-3">
+        <img src="{{ item.image_url or 'https://placehold.co/60' }}"
+             alt="{{ item.name }}" class="w-16 h-16 rounded-xl object-cover">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-gray-900 text-sm truncate">{{ item.name }}</p>
+          <p class="text-xs text-gray-500 mb-1">{{ item.price | rupiah }}</p>
+          <p class="text-sm font-bold text-brand-600">{{ item.subtotal | rupiah }}</p>
+        </div>
+
+        <div class="flex flex-col items-end gap-2">
+          <form method="POST" action="{{ url_for('customer.remove_from_cart', item_id=item.id) }}">
+            <button type="submit" class="text-red-400 p-1">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <form method="POST" action="{{ url_for('customer.update_cart', item_id=item.id) }}"
+                class="flex items-center gap-1 bg-gray-100 rounded-xl">
+            <button type="submit" name="quantity" value="{{ item.quantity - 1 }}"
+                    class="w-7 h-7 flex items-center justify-center">
+              <i data-lucide="minus" class="w-3 h-3"></i>
+            </button>
+            <span class="w-6 text-center text-sm font-bold">{{ item.quantity }}</span>
+            <button type="submit" name="quantity" value="{{ item.quantity + 1 }}"
+                    class="w-7 h-7 flex items-center justify-center">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Summary -->
+    <div class="bg-white rounded-2xl p-5 shadow-soft mb-4">
+      <div class="flex justify-between text-sm mb-2">
+        <span class="text-gray-600">Subtotal ({{ summary.total_items }} item)</span>
+        <span class="font-semibold">{{ summary.total_price | rupiah }}</span>
+      </div>
+      <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-100">
+        <span>Total</span>
+        <span class="text-brand-600">{{ summary.total_price | rupiah }}</span>
+      </div>
+    </div>
+
+    <a href="{{ url_for('customer.preorder') }}"
+       class="block w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 rounded-2xl text-center shadow-soft">
+      Lanjut ke Pre-Order →
+    </a>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+  {% include 'customer/_bottom_nav.html' %}
+{% endblock %}

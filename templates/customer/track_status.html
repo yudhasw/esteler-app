@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Status Pesanan - Dapur Hijrah{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-cream pb-24">
+  {% include "customer/_header.html" %}
+
+  <div class="px-4 pt-4">
+    <a href="{{ url_for('customer.track') }}" class="inline-flex items-center gap-2 text-brand-700 mb-4">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      <span class="text-sm font-medium">Lacak Pesanan Lain</span>
+    </a>
+
+    <!-- Order Header Card -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <p class="text-xs text-gray-500 mb-1">Kode Pesanan</p>
+          <p class="text-xl font-bold text-gray-900">{{ order.order_code }}</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold
+          {% if order.status == 'menunggu' %}bg-amber-100 text-amber-700
+          {% elif order.status == 'memasak' %}bg-blue-100 text-blue-700
+          {% elif order.status == 'siap' %}bg-purple-100 text-purple-700
+          {% elif order.status == 'selesai' %}bg-green-100 text-green-700
+          {% else %}bg-red-100 text-red-700{% endif %}">
+          {{ order.status|capitalize }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-sm pt-3 border-t border-gray-100">
+        <div>
+          <p class="text-xs text-gray-500">Nama</p>
+          <p class="font-medium text-gray-900">{{ order.customer_name }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Jadwal Ambil</p>
+          <p class="font-medium text-gray-900">
+            {% if order.pickup_schedule %}
+              {{ order.pickup_schedule.strftime('%d %b, %H:%M') }}
+            {% else %}-{% endif %}
+          </p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Pembayaran</p>
+          <p class="font-medium text-gray-900">{{ order.payment_method or 'TUNAI' }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Dibuat</p>
+          <p class="font-medium text-gray-900">{{ order.created_at.strftime('%d %b, %H:%M') }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Timeline -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <h3 class="font-semibold text-gray-900 mb-4">Progres Pesanan</h3>
+
+      {% set steps = [
+        ('menunggu', 'Pesanan Diterima', 'clock'),
+        ('memasak', 'Sedang Disiapkan', 'chef-hat'),
+        ('siap', 'Siap Diambil', 'package-check'),
+        ('selesai', 'Selesai', 'check-circle')
+      ] %}
+      {% set status_order = {'menunggu': 0, 'memasak': 1, 'siap': 2, 'selesai': 3, 'dibatalkan': -1} %}
+      {% set current_idx = status_order.get(order.status, 0) %}
+
+      <div class="space-y-4">
+        {% for status_key, label, icon in steps %}
+          {% set idx = loop.index0 %}
+          {% set is_done = idx <= current_idx and order.status != 'dibatalkan' %}
+          {% set is_active = idx == current_idx and order.status != 'dibatalkan' %}
+          <div class="flex items-start gap-3">
+            <div class="flex flex-col items-center">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center
+                {% if is_done %}bg-brand-500 text-white
+                {% else %}bg-gray-100 text-gray-400{% endif %}">
+                <i data-lucide="{{ icon }}" class="w-5 h-5"></i>
+              </div>
+              {% if not loop.last %}
+                <div class="w-0.5 h-8 mt-1 {% if idx < current_idx %}bg-brand-500{% else %}bg-gray-200{% endif %}"></div>
+              {% endif %}
+            </div>
+            <div class="flex-1 pt-2">
+              <p class="font-medium {% if is_done %}text-gray-900{% else %}text-gray-400{% endif %}">{{ label }}</p>
+              {% if is_active %}
+                <p class="text-xs text-brand-600 mt-0.5">Saat ini</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if order.status == 'dibatalkan' %}
+        <div class="mt-4 p-3 bg-red-50 rounded-lg flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0"></i>
+          <p class="text-sm text-red-700">Pesanan ini telah dibatalkan.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Items List -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <h3 class="font-semibold text-gray-900 mb-3">Detail Pesanan</h3>
+      <div class="space-y-3">
+        {% for item in order.items %}
+          <div class="flex items-start justify-between py-2 {% if not loop.last %}border-b border-gray-100{% endif %}">
+            <div class="flex-1">
+              <p class="font-medium text-gray-900 text-sm">{{ item.menu.name if item.menu else 'Menu' }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ item.quantity }}x &middot; {{ item.price_at_order|rupiah }}</p>
+            </div>
+            <p class="font-semibold text-gray-900 text-sm">{{ item.subtotal|rupiah }}</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
+        <span class="font-semibold text-gray-900">Total</span>
+        <span class="text-lg font-bold text-brand-600">{{ order.total|rupiah }}</span>
+      </div>
+    </div>
+
+    {% if order.note %}
+      <div class="bg-amber-50 rounded-2xl p-4 mb-4">
+        <p class="text-xs font-medium text-amber-700 mb-1">Catatan</p>
+        <p class="text-sm text-amber-900">{{ order.note }}</p>
+      </div>
+    {% endif %}
+
+    <div class="flex gap-3">
+      <a href="{{ url_for('customer.menu') }}"
+         class="flex-1 py-3 bg-white border border-brand-500 text-brand-700 rounded-xl text-center font-medium">
+        Pesan Lagi
+      </a>
+      <a href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20tanya%20pesanan%20{{ order.order_code }}"
+         target="_blank"
+         class="flex-1 py-3 bg-brand-600 text-white rounded-xl text-center font-medium flex items-center justify-center gap-2">
+        <i data-lucide="message-circle" class="w-4 h-4"></i>
+        Hubungi
+      </a>
+    </div>
+  </div>
+
+  {% include "customer/_bottom_nav.html" %}
+</div>
+
+{% if order.status in ['menunggu', 'memasak'] %}
+<script>
+  // Auto-refresh tiap 30 detik kalau pesanan masih in-progress
+  setTimeout(() => window.location.reload(), 30000);
+</script>
+{% endif %}
+{% endblock %}

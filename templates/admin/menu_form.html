@@ -1,0 +1,87 @@
+{% extends "admin/_layout_admin.html" %}
+{% set active_nav = 'menu' %}
+{% block title %}{% if menu %}Edit{% else %}Tambah{% endif %} Menu · Dapur Hijrah{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+  <a href="{{ url_for('admin.menu_management') }}" class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+  </a>
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-4">
+    {% if menu %}Edit Menu{% else %}Tambah Menu Baru{% endif %}
+  </h1>
+
+  <form method="POST" class="bg-white rounded-2xl p-5 shadow-soft space-y-4">
+
+    <!-- Image preview -->
+    {% if menu and menu.image_url %}
+      <img src="{{ menu.image_url }}" class="w-full h-40 object-cover rounded-xl">
+    {% endif %}
+
+    <!-- Image URL -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">URL Gambar</label>
+      <input type="url" name="image_url" value="{{ menu.image_url if menu else '' }}"
+             placeholder="https://..."
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <!-- Name -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Menu *</label>
+      <input type="text" name="name" required value="{{ menu.name if menu else '' }}"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <!-- Category -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+      <select name="category"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        {% for cat in ['Original', 'Premium', 'Signature', 'Side', 'Main', 'Beverages'] %}
+          <option value="{{ cat }}" {% if menu and menu.category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Price -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Harga (Rp) *</label>
+      <input type="number" name="price" required min="0" value="{{ menu.price if menu else '' }}"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi</label>
+      <textarea name="description" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">{{ menu.description if menu else '' }}</textarea>
+    </div>
+
+    <!-- Flags -->
+    <div class="space-y-2">
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="is_active" {% if not menu or menu.is_active %}checked{% endif %}
+               class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500">
+        <span class="text-sm">Aktif (tampil ke customer)</span>
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="is_best_seller" {% if menu and menu.is_best_seller %}checked{% endif %}
+               class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500">
+        <span class="text-sm">Tandai Best Seller</span>
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="is_favorite" {% if menu and menu.is_favorite %}checked{% endif %}
+               class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500">
+        <span class="text-sm">Tandai Favorit</span>
+      </label>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-2xl">
+      {% if menu %}Simpan Perubahan{% else %}Buat Menu{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}

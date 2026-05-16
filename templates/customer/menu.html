@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% set active_nav = 'menu' %}
+{% block title %}Menu · Dapur Hijrah{% endblock %}
+
+{% block header %}
+  {% include 'customer/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+
+  <!-- Search Bar -->
+  <form method="GET" class="relative mb-5">
+    <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+    <input type="text" name="q" value="{{ keyword }}" placeholder="Cari menu favoritmu..."
+           class="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border border-gray-200 text-sm shadow-soft focus:outline-none focus:ring-2 focus:ring-brand-500">
+    <i data-lucide="sparkles" class="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-amber-500"></i>
+  </form>
+
+  <!-- AI Recommendations -->
+  {% if recommendations %}
+  <div class="mb-5">
+    <div class="flex items-center gap-2 mb-3">
+      <h2 class="font-bold text-gray-900">Recommended for you</h2>
+      <div class="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center">
+        <i data-lucide="star" class="w-3 h-3 text-white fill-white"></i>
+      </div>
+    </div>
+
+    <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-2">
+      {% for r in recommendations %}
+        {% set m = r.menu %}
+        {% if m %}
+        <div class="bg-white rounded-2xl overflow-hidden shadow-soft w-56 flex-shrink-0">
+          <div class="relative">
+            <img src="{{ m.image_url or 'https://placehold.co/300x200' }}"
+                 alt="{{ m.name }}" class="w-full h-36 object-cover">
+            <div class="absolute top-2 left-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg flex items-center gap-1">
+              <i data-lucide="zap" class="w-3 h-3 text-amber-500 fill-amber-500"></i>
+              <span class="text-xs font-bold text-gray-900">{{ (r.match_score * 100) | int }}% Match</span>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="flex items-baseline justify-between mb-1">
+              <p class="font-bold text-gray-900 text-sm truncate flex-1">{{ m.name }}</p>
+              <span class="text-brand-600 font-bold text-sm">{{ m.price | rupiah }}</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-3 line-clamp-1">{{ m.description or '-' }}</p>
+            <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
+              <input type="hidden" name="menu_id" value="{{ m.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit"
+                      class="w-full bg-brand-600 text-white font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                Tambah ke Keranjang
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Daftar Menu Header -->
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <h2 class="text-lg font-bold text-gray-900">Daftar Menu</h2>
+      <p class="text-xs text-gray-500">Temukan hidangan terbaik kami</p>
+    </div>
+    <div class="flex gap-1 bg-white rounded-xl p-1 shadow-soft">
+      <button class="p-1.5 bg-gray-100 rounded-lg"><i data-lucide="grid-2x2" class="w-4 h-4 text-gray-700"></i></button>
+      <button class="p-1.5"><i data-lucide="list" class="w-4 h-4 text-gray-400"></i></button>
+    </div>
+  </div>
+
+  <!-- Menu Grid -->
+  <div class="grid grid-cols-2 gap-3">
+    {% for menu in menus %}
+    <div class="bg-white rounded-2xl overflow-hidden shadow-soft">
+      <div class="relative">
+        <img src="{{ menu.image_url or 'https://placehold.co/200' }}"
+             alt="{{ menu.name }}" class="w-full h-32 object-cover">
+        {% if menu.is_best_seller %}
+          <span class="absolute top-2 left-2 bg-brand-500 text-white text-[9px] font-bold px-2 py-0.5 rounded">BEST SELLER</span>
+        {% elif menu.is_favorite %}
+          <span class="absolute top-2 left-2 bg-amber-400 text-white text-[9px] font-bold px-2 py-0.5 rounded">FAVORITE</span>
+        {% endif %}
+      </div>
+      <div class="p-3">
+        <p class="font-bold text-gray-900 text-sm truncate mb-1">{{ menu.name }}</p>
+        <div class="flex items-center gap-1 mb-2">
+          <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+          <span class="text-xs text-gray-600">{{ menu.rating }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-gray-900 text-sm">{{ menu.price | rupiah }}</span>
+          <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
+            <input type="hidden" name="menu_id" value="{{ menu.id }}">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center active:scale-95 transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5 text-white"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-span-2 text-center py-12 text-gray-400">
+      <i data-lucide="utensils-crossed" class="w-12 h-12 mx-auto mb-2"></i>
+      <p>Belum ada menu</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Floating Cart Button -->
+  {% if cart_count > 0 %}
+  <a href="{{ url_for('customer.cart_view') }}"
+     class="fixed bottom-20 right-4 w-14 h-14 bg-amber-400 rounded-full shadow-lg flex items-center justify-center z-20">
+    <i data-lucide="shopping-basket" class="w-6 h-6 text-gray-900"></i>
+    <span class="absolute -top-1 -right-1 bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+      {{ cart_count }}
+    </span>
+  </a>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+  {% include 'customer/_bottom_nav.html' %}
+{% endblock %}

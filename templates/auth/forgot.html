@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Lupa Sandi · Dapur Hijrah{% endblock %}
+{% block container_padding %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col px-4 py-6">
+  <a href="{{ url_for('auth.login') }}" class="flex items-center gap-2 text-sm text-gray-600 mb-6">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Login
+  </a>
+
+  <div class="bg-white rounded-3xl p-6 shadow-soft">
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">Reset Password</h1>
+    <p class="text-sm text-gray-600 mb-6">Masukkan email terdaftar untuk menerima link reset password.</p>
+
+    <form method="POST" class="space-y-4">
+      <input type="email" name="email" required placeholder="email@dapurhijrah.id"
+             class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-brand-500">
+      <button type="submit"
+              class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold
+                     py-3 rounded-2xl">Kirim Link Reset</button>
+    </form>
+
+    <p class="text-xs text-gray-400 mt-4 text-center">
+      Fitur dalam pengembangan. Hubungi admin jika perlu reset.
+    </p>
+  </div>
+</div>
+{% endblock %}

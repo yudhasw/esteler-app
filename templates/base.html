@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>{% block title %}Dapur Hijrah{% endblock %}</title>
+
+<!-- TailwindCSS via CDN (tidak perlu npm build) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Google Fonts: Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        },
+        colors: {
+          // Tema hijau Dapur Hijrah (dari design)
+          brand: {
+            50:  '#f0fdf4',
+            100: '#dcfce7',
+            200: '#bbf7d0',
+            300: '#86efac',
+            400: '#4ade80',
+            500: '#22c55e',
+            600: '#16a34a',  // primary
+            700: '#15803d',
+            800: '#166534',
+            900: '#14532d',
+          },
+          cream: '#faf7f0',     // background warm
+          accent: '#f59e0b',    // amber/yellow accent
+        },
+        boxShadow: {
+          'soft': '0 2px 12px rgba(0,0,0,0.06)',
+          'card': '0 4px 20px rgba(0,0,0,0.08)',
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  body { font-family: 'Inter', sans-serif; background: #faf7f0; }
+  /* Hilangkan scrollbar di mobile carousel */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+{% block head_extra %}{% endblock %}
+</head>
+<body class="min-h-screen text-gray-800 antialiased">
+
+  <!-- Container mobile-first (max 480px), centered di desktop -->
+  <div class="max-w-md mx-auto bg-cream min-h-screen relative {% block container_padding %}pb-24{% endblock %}">
+
+    {% block header %}{% endblock %}
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="px-4 pt-3 space-y-2">
+          {% for category, msg in messages %}
+            {% set color_map = {'success': 'bg-brand-100 text-brand-800 border-brand-300',
+                                'danger': 'bg-red-100 text-red-800 border-red-300',
+                                'warning': 'bg-amber-100 text-amber-800 border-amber-300',
+                                'info': 'bg-blue-100 text-blue-800 border-blue-300'} %}
+            <div class="px-4 py-2.5 rounded-xl border text-sm font-medium {{ color_map.get(category, 'bg-gray-100 text-gray-800 border-gray-300') }}">
+              {{ msg }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    {% block bottom_nav %}{% endblock %}
+
+  </div>
+
+  <script>
+    // Inisialisasi icons
+    if (window.lucide) lucide.createIcons();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

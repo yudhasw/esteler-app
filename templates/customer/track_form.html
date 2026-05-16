@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set active_nav = 'orders' %}
+{% block title %}Lacak Pesanan · Dapur Hijrah{% endblock %}
+
+{% block header %}
+  {% include 'customer/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Lacak Pesanan</h1>
+  <p class="text-sm text-gray-500 mb-5">Pantau status pesanan dengan kode order.</p>
+
+  <!-- Cek Status Card (sesuai design) -->
+  <div class="bg-gray-900 rounded-3xl p-6 shadow-card mb-5">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <h3 class="text-white font-bold text-lg">Cek status order</h3>
+        <p class="text-gray-300 text-sm">Pantau pesananmu secara real-time</p>
+      </div>
+      <div class="w-12 h-12 bg-brand-500/30 rounded-xl flex items-center justify-center">
+        <i data-lucide="at-sign" class="w-5 h-5 text-brand-400"></i>
+      </div>
+    </div>
+
+    <form method="GET" class="mt-4 space-y-3">
+      <div class="flex gap-2">
+        <input type="text" name="code" required placeholder="ID Pesanan (Contoh: ORD-20260516-A1B2)"
+               class="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <button type="submit" class="w-12 bg-brand-500 rounded-xl flex items-center justify-center">
+          <i data-lucide="search" class="w-4 h-4 text-white"></i>
+        </button>
+      </div>
+      <button type="submit" class="w-full bg-amber-400 text-gray-900 font-bold py-3 rounded-xl">
+        Cek Pesanan
+      </button>
+    </form>
+  </div>
+
+  <!-- CTA back to menu -->
+  <a href="{{ url_for('customer.menu_list') }}"
+     class="block text-center text-sm text-brand-600 font-semibold py-3">
+    Belum pesan? Lihat menu →
+  </a>
+
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+  {% include 'customer/_bottom_nav.html' %}
+{% endblock %}

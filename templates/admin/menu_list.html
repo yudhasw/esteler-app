@@ -1,0 +1,98 @@
+{% extends "admin/_layout_admin.html" %}
+{% set active_nav = 'menu' %}
+{% block title %}Kelola Menu · Dapur Hijrah{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+
+  <!-- Tab Switcher -->
+  <div class="flex bg-white rounded-2xl p-1 mb-5 shadow-soft">
+    <button class="flex-1 py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-sm">Kelola Menu</button>
+    <a href="{{ url_for('admin.order_list') }}" class="flex-1 py-2.5 text-gray-600 font-semibold text-sm text-center">Kelola Order</a>
+  </div>
+
+  <!-- Ringkasan Hari Ini -->
+  <div class="bg-white rounded-2xl p-5 shadow-soft mb-4">
+    <h2 class="text-base font-bold text-gray-900 mb-3">Ringkasan Hari Ini</h2>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="utensils" class="w-4 h-4 text-brand-600"></i>
+        </div>
+        <span class="flex-1 text-sm font-semibold text-gray-700">Total Menu</span>
+        <span class="font-bold text-gray-900">{{ summary.total }}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="check-circle" class="w-4 h-4 text-amber-600"></i>
+        </div>
+        <span class="flex-1 text-sm font-semibold text-gray-700">Order Selesai</span>
+        <span class="font-bold text-gray-900">{{ summary.completed_today }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo Add Menu -->
+  <div class="bg-brand-500 text-white rounded-2xl p-5 mb-4 shadow-soft">
+    <h3 class="font-bold text-lg mb-2">Tambah Menu Baru</h3>
+    <p class="text-sm opacity-90 mb-4">Perbarui daftar hidangan Anda dengan cepat untuk menarik lebih banyak pelanggan.</p>
+    <a href="{{ url_for('admin.menu_create') }}"
+       class="block w-full bg-white text-brand-700 font-bold py-3 rounded-xl text-center">
+      + Buat Produk
+    </a>
+  </div>
+
+  <!-- Search + List Header -->
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <h3 class="font-bold text-gray-900">Daftar Menu Aktif</h3>
+    </div>
+    <div class="flex gap-2">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input type="text" placeholder="Cari menu..."
+               class="pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-sm w-40 focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
+      <a href="{{ url_for('admin.menu_create') }}"
+         class="w-9 h-9 bg-brand-600 text-white rounded-xl flex items-center justify-center shadow-soft">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Daftar Menu -->
+  <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+    {% for menu in menus %}
+    <div class="flex items-center gap-3 p-3 border-b border-gray-100 last:border-0 {% if not menu.is_active %}opacity-50{% endif %}">
+      <img src="{{ menu.image_url or 'https://placehold.co/60' }}"
+           alt="{{ menu.name }}" class="w-14 h-14 rounded-xl object-cover {% if not menu.is_active %}grayscale{% endif %}">
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-gray-900 truncate {% if not menu.is_active %}line-through{% endif %}">{{ menu.name }}</p>
+        <p class="text-xs text-gray-500">ID: MNU-{{ '%03d' % menu.id }}</p>
+        <p class="text-xs text-gray-500 truncate">{{ menu.category or '-' }}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-bold text-gray-900 text-sm mb-1">{{ menu.price | rupiah }}</p>
+        <div class="flex gap-1">
+          <a href="{{ url_for('admin.menu_edit', menu_id=menu.id) }}"
+             class="p-1.5 bg-gray-100 rounded-lg" title="Edit">
+            <i data-lucide="pencil" class="w-3.5 h-3.5 text-gray-600"></i>
+          </a>
+          <form method="POST" action="{{ url_for('admin.toggle_menu', menu_id=menu.id) }}" class="inline">
+            <button type="submit" class="p-1.5 bg-gray-100 rounded-lg" title="Toggle">
+              <i data-lucide="power" class="w-3.5 h-3.5 text-gray-600"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="p-8 text-center text-gray-400">
+      <i data-lucide="utensils-crossed" class="w-12 h-12 mx-auto mb-2"></i>
+      <p class="text-sm">Belum ada menu. Tambah menu pertama!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

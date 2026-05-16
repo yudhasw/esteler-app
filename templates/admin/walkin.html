@@ -1,0 +1,70 @@
+{% extends "admin/_layout_admin.html" %}
+{% set active_nav = 'orders' %}
+{% block title %}Order Walk-in · Dapur Hijrah{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-4">
+  <a href="{{ url_for('admin.order_list') }}" class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+  </a>
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Order Walk-in</h1>
+  <p class="text-sm text-gray-500 mb-5">Customer datang langsung, input pesanan di sini.</p>
+
+  <form method="POST" class="space-y-4">
+
+    <!-- Customer Info -->
+    <div class="bg-white rounded-2xl p-5 shadow-soft space-y-3">
+      <h3 class="font-bold text-gray-900">Info Customer</h3>
+      <input type="text" name="customer_name" placeholder="Nama (opsional)"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+      <input type="text" name="customer_contact" placeholder="No HP (opsional)"
+             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <!-- Payment Method -->
+    <div class="bg-white rounded-2xl p-5 shadow-soft">
+      <h3 class="font-bold text-gray-900 mb-3">Metode Pembayaran</h3>
+      <div class="grid grid-cols-3 gap-2">
+        {% for pay in [('TUNAI', 'banknote'), ('QRIS', 'qr-code'), ('COD', 'truck')] %}
+          <label class="cursor-pointer">
+            <input type="radio" name="payment_method" value="{{ pay[0] }}" {% if pay[0] == 'TUNAI' %}checked{% endif %} class="peer sr-only">
+            <div class="flex flex-col items-center gap-1 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-brand-500 peer-checked:bg-brand-50">
+              <i data-lucide="{{ pay[1] }}" class="w-5 h-5 text-gray-600"></i>
+              <span class="text-xs font-semibold">{{ pay[0] }}</span>
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Pilih Menu -->
+    <div class="bg-white rounded-2xl p-5 shadow-soft">
+      <h3 class="font-bold text-gray-900 mb-3">Pilih Menu</h3>
+      <div class="space-y-2 max-h-96 overflow-y-auto">
+        {% for menu in menus %}
+        <div class="flex items-center gap-3 p-2 border border-gray-100 rounded-xl">
+          <input type="hidden" name="menu_id[]" value="{{ menu.id }}">
+          <img src="{{ menu.image_url or 'https://placehold.co/40' }}" class="w-12 h-12 rounded-lg object-cover">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate">{{ menu.name }}</p>
+            <p class="text-xs text-gray-500">{{ menu.price | rupiah }}</p>
+          </div>
+          <input type="number" name="quantity[]" value="0" min="0" max="99"
+                 class="w-14 px-2 py-1.5 text-center text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Note -->
+    <textarea name="note" rows="2" placeholder="Catatan tambahan..."
+              class="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-soft"></textarea>
+
+    <button type="submit"
+            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-2xl">
+      Buat Order Walk-in
+    </button>
+  </form>
+</div>
+{% endblock %}
