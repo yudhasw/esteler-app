@@ -149,3 +149,18 @@ def track_status(code):
         flash("Pesanan tidak ditemukan.", "danger")
         return redirect(url_for("customer.track_form"))
     return render_template("customer/track_status.html", order=order)
+
+
+
+@customer_bp.route("/order/<order_code>/payment")
+def payment(order_code):
+    """Halaman bayar sekarang - arahkan customer ke WhatsApp admin."""
+    session_id = get_session_id()
+    order = OrderService.get_order_by_code(order_code)
+
+    # Validasi: order harus ada, dan session harus cocok
+    # (simpan session_id di order saat checkout, atau skip validasi jika tidak ada field-nya)
+    if not order:
+        return redirect(url_for("customer.home"))
+
+    return render_template("customer/payment.html", order=order)

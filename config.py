@@ -47,7 +47,7 @@ class Config:
         "pool_timeout": 30,
         "connect_args": {
             "connect_timeout": 10,
-            "options": "-c statement_timeout=8000",  # 8s query timeout (< Vercel 10s)
+            #"options": "-c statement_timeout=8000",  # 8s query timeout (< Vercel 10s)
         },
     }
 

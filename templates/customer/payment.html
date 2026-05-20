@@ -1,0 +1,173 @@
+{% extends "customer/base.html" %}
+{% block title %}Bayar Sekarang - GourmetGo{% endblock %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bayar Sekarang</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Inter', sans-serif; background: #fbf9f1; min-height: 100dvh; }
+  .glass-card {
+    background: rgba(255, 253, 245, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid #E8F5E9;
+  }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  .active-tap { transition: transform 0.1s ease; }
+  .active-tap:active { transform: scale(0.95); }
+</style>
+</head>
+
+<body class="text-[#1b1c17] min-h-screen flex flex-col items-center">
+
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-white shadow-sm border-b border-zinc-100 flex justify-between items-center px-5 h-16 max-w-md mx-auto">
+  <a href="{{ url_for('customer.home') }}" class="active-tap p-2 -ml-2 text-zinc-500">
+    <span class="material-symbols-outlined">arrow_back</span>
+  </a>
+  <h1 class="font-['Plus_Jakarta_Sans'] font-bold text-lg text-orange-600">Konfirmasi Pesanan</h1>
+  <div class="w-10"></div>
+</header>
+
+<main class="w-full max-w-md mt-16 px-4 pb-32 pt-6 space-y-6">
+
+  <!-- Hero Card -->
+  <section class="glass-card rounded-[24px] p-6 text-center space-y-4">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-700 mb-2">
+      <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+    </div>
+    <div class="space-y-1">
+      <h2 class="font-['Plus_Jakarta_Sans'] text-2xl font-bold">Pesanan Diterima</h2>
+      <p class="text-xs text-[#3f4a3c]">Segera selesaikan pembayaran Anda</p>
+    </div>
+    <!-- Order Code -->
+    <div class="bg-[#f5f4ec] rounded-xl p-4 flex items-center justify-between border border-[#becab9]/30">
+      <div class="text-left">
+        <p class="text-[10px] text-[#3f4a3c] uppercase tracking-wider font-semibold">Order ID</p>
+        <p class="text-sm font-bold text-[#1b1c17] mt-0.5">{{ order.order_code }}</p>
+      </div>
+      <button class="p-2 bg-white rounded-lg border border-[#becab9] active-tap text-[#006e1c]"
+              onclick="copyText('{{ order.order_code }}')">
+        <span class="material-symbols-outlined text-xl" id="copy-icon">content_copy</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Ringkasan Pesanan -->
+  <section class="space-y-3">
+    <h3 class="text-xs font-semibold px-2 flex items-center gap-2 text-[#3f4a3c] uppercase tracking-wider">
+      <span class="material-symbols-outlined text-sm">list_alt</span>
+      Ringkasan Pesanan
+    </h3>
+    <div class="glass-card rounded-[24px] divide-y divide-zinc-100">
+      {% for item in order.items %}
+      <div class="p-4 flex items-center gap-4">
+        <!-- Gambar dari menu (eager-loaded via lazy="joined") -->
+        {% if item.menu and item.menu.image_url %}
+        <div class="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0">
+          <img class="w-full h-full object-cover"
+               src="{{ item.menu.image_url }}"
+               alt="{{ item.menu.name }}"/>
+        </div>
+        {% else %}
+        <div class="w-14 h-14 rounded-2xl bg-[#f0eee6] flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-[#3f4a3c]">fastfood</span>
+        </div>
+        {% endif %}
+        <div class="flex-grow">
+          <p class="text-sm font-semibold text-[#1b1c17]">
+            {{ item.menu.name if item.menu else '-' }}
+          </p>
+          <p class="text-xs text-[#3f4a3c]">{{ item.quantity }}x Pesanan</p>
+        </div>
+        <p class="text-sm font-semibold text-[#1b1c17] whitespace-nowrap">
+          Rp{{ "{:,.0f}".format(item.subtotal).replace(',', '.') }}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Total Pembayaran -->
+  <section class="glass-card rounded-[24px] p-6 border-2 border-green-200">
+    <div class="flex justify-between items-center">
+      <div>
+        <p class="text-xs text-[#3f4a3c]">Total Pembayaran</p>
+        <p class="font-['Plus_Jakarta_Sans'] text-2xl font-extrabold text-[#006e1c] mt-1">
+          Rp{{ "{:,.0f}".format(order.total).replace(',', '.') }}
+        </p>
+      </div>
+      <div class="bg-[#4caf50] text-white px-3 py-1 rounded-full text-[12px] font-semibold uppercase">
+        {{ order.status | capitalize }}
+      </div>
+    </div>
+  </section>
+
+  <!-- Instruksi -->
+  <section class="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+    <div class="text-amber-600 mt-0.5 flex-shrink-0">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+    </div>
+    <p class="text-xs text-amber-800 leading-relaxed">
+      Untuk melanjutkan pembayaran, silakan hubungi admin melalui WhatsApp untuk mendapatkan rekening transfer.
+    </p>
+  </section>
+
+</main>
+
+<!-- Bottom Button -->
+<div class="fixed bottom-0 w-full max-w-md bg-white/95 backdrop-blur-md px-4 pb-8 pt-4 rounded-t-3xl shadow-[0_-4px_30px_rgba(0,0,0,0.08)]">
+  <button class="w-full h-14 bg-[#006e1c] text-white text-sm font-semibold rounded-2xl flex items-center justify-center gap-3 active-tap shadow-lg"
+          onclick="contactWhatsApp()">
+    <span class="material-symbols-outlined">chat</span>
+    Hubungi via WhatsApp
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-[#1b1c17] text-white px-4 py-2 rounded-full text-xs opacity-0 pointer-events-none transition-all duration-300 translate-y-4 whitespace-nowrap z-50"
+     id="toast">
+  Order ID berhasil disalin!
+</div>
+
+<script>
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      // Ganti icon
+      const icon = document.getElementById('copy-icon');
+      icon.textContent = 'done';
+      setTimeout(() => icon.textContent = 'content_copy', 1500);
+      // Toast
+      const toast = document.getElementById('toast');
+      toast.classList.remove('opacity-0', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2000);
+    });
+  }
+
+  function contactWhatsApp() {
+    const orderId = "{{ order.order_code }}";
+    const total   = "{{ '{:,.0f}'.format(order.total).replace(',', '.') }}";
+    const msg = encodeURIComponent(
+      `Halo Admin GourmetGo, saya ingin melakukan pembayaran untuk pesanan ${orderId} sebesar Rp${total}. Mohon informasi rekening transfernya.`
+    );
+    // Ganti nomor WA admin di bawah
+    window.open(`https://wa.me/6289608154576?text=${msg}`, '_blank');
+  }
+</script>
+
+</body>
+</html>
+{% endblock %}
