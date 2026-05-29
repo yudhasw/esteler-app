@@ -2,19 +2,23 @@
 <header class="sticky top-0 z-30 bg-cream/95 backdrop-blur border-b border-gray-200/60">
   <div class="flex items-center justify-between px-4 py-3">
     <div class="flex items-center gap-2">
-      <button class="p-1 -ml-1" aria-label="Menu">
-        <i data-lucide="menu" class="w-6 h-6 text-gray-700"></i>
-      </button>
       <a href="{{ url_for('customer.home') }}" class="flex items-center gap-1.5">
         <i data-lucide="chef-hat" class="w-6 h-6 text-brand-600"></i>
         <span class="font-bold text-lg text-brand-700">Dapur Hijrah</span>
       </a>
     </div>
     <div class="flex items-center gap-3">
-      <a href="{{ url_for('customer.cart_view') }}" class="relative">
-        <img src="https://i.pravatar.cc/40?img=12" alt="Profile"
-             class="w-8 h-8 rounded-full border-2 border-brand-200">
-      </a>
+    <div class="w-8 h-8 rounded-full border-2 border-brand-200 bg-gray-200 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5 text-gray-500">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.933 17.933 0 0112 21.75a17.933 17.933 0 01-7.5-1.632z" />
+        </svg>
+    </div>
     </div>
   </div>
 </header>

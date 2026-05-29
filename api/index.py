@@ -16,7 +16,7 @@ import sys
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT_DIR)
 
-from flask import Flask
+from flask import Flask, session
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -57,6 +57,19 @@ def create_app() -> Flask:
     app.register_blueprint(customer_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)
+
+    # Context processor: cart_count otomatis tersedia di semua template
+    @app.context_processor
+    def inject_cart_count():
+        from services.cart_service import CartService
+        session_id = session.get("cart_session_id")
+        count = 0
+        if session_id:
+            try:
+                count = CartService.get_summary(session_id)["total_items"]
+            except Exception:
+                count = 0
+        return {"cart_count": count}
 
     # Global template context (currency formatter dll)
     @app.template_filter("rupiah")
