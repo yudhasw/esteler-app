@@ -55,7 +55,8 @@
           <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
             <input type="hidden" name="menu_id" value="{{ menu.id }}">
             <input type="hidden" name="quantity" value="1">
-            <button type="submit" class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center">
+            <button type="submit"
+                    class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center active:scale-95 transition">
               <i data-lucide="plus" class="w-3.5 h-3.5 text-white"></i>
             </button>
           </form>
@@ -78,6 +79,17 @@
       </div>
     </div>
   </a>
+
+  <!-- Floating Cart Button -->
+  {% if cart_count > 0 %}
+  <a href="{{ url_for('customer.cart_view') }}"
+     class="fixed bottom-20 right-4 w-14 h-14 bg-amber-400 rounded-full shadow-lg flex items-center justify-center z-20">
+    <i data-lucide="shopping-basket" class="w-6 h-6 text-gray-900"></i>
+    <span class="absolute -top-1 -right-1 bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+      {{ cart_count }}
+    </span>
+  </a>
+  {% endif %}
 
 </div>
 {% endblock %}
