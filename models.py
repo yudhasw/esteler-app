@@ -161,6 +161,7 @@ class Order(db.Model):
     )
     total = db.Column(db.Integer, nullable=False)
     order_type = db.Column(db.String(20), default="pickup")  # pickup/delivery/dine-in
+    rating = db.Column(db.Integer, nullable=True)  # NEW - rating pesanan
     created_at = db.Column(db.DateTime(timezone=True), default=now_utc, index=True)
     updated_at = db.Column(
         db.DateTime(timezone=True), default=now_utc, onupdate=now_utc

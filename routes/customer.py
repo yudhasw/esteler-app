@@ -164,3 +164,15 @@ def payment(order_code):
         return redirect(url_for("customer.home"))
 
     return render_template("customer/payment.html", order=order)
+
+@customer_bp.route("/api/order/<order_code>/rating", methods=["POST"])
+def submit_rating(order_code):
+    try:
+        data = request.get_json()
+        rating_val = int(data.get("rating", 0))
+        success = OrderService.save_rating(order_code, rating_val)
+        if success:
+            return {"success": True, "message": "Rating berhasil disimpan"}
+        return {"success": False, "message": "Gagal menyimpan rating atau rating sudah pernah diberikan."}, 400
+    except Exception as e:
+        return {"success": False, "message": str(e)}, 500

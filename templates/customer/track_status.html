@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Status Pesanan - Dapur Hijrah{% endblock %}
 
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+  .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .star-active {
+      font-variation-settings: 'FILL' 1;
+      color: #16a34a; /* Tailwind brand-600 */
+  }
+  .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-cream pb-24">
   {% include "customer/_header.html" %}
@@ -141,6 +158,45 @@
     </div>
   </div>
 
+  {% if order.status == 'selesai' %}
+  <!-- Rating Modal Overlay -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 modal-overlay" id="ratingModal">
+    <div class="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-2xl transform transition-all animate-in fade-in zoom-in duration-300">
+      <div class="text-center">
+        <h3 class="text-xl font-bold mb-2">Bagaimana pengalaman Anda?</h3>
+        <p class="text-gray-500 text-sm mb-6">Berikan rating untuk pesanan <span class="font-semibold text-gray-900">{{ order.order_code }}</span></p>
+        <!-- Star Selector -->
+        <div class="flex justify-center gap-2 mb-6" id="starContainer">
+          <button class="star-btn p-1" data-rating="1" type="button">
+            <span class="material-symbols-outlined text-[40px] transition-colors text-gray-300">star</span>
+          </button>
+          <button class="star-btn p-1" data-rating="2" type="button">
+            <span class="material-symbols-outlined text-[40px] transition-colors text-gray-300">star</span>
+          </button>
+          <button class="star-btn p-1" data-rating="3" type="button">
+            <span class="material-symbols-outlined text-[40px] transition-colors text-gray-300">star</span>
+          </button>
+          <button class="star-btn p-1" data-rating="4" type="button">
+            <span class="material-symbols-outlined text-[40px] transition-colors text-gray-300">star</span>
+          </button>
+          <button class="star-btn p-1" data-rating="5" type="button">
+            <span class="material-symbols-outlined text-[40px] transition-colors text-gray-300">star</span>
+          </button>
+        </div>
+        <!-- Actions -->
+        <div class="flex flex-col gap-3">
+          <button class="w-full bg-brand-600 text-white font-medium py-4 rounded-full shadow-md active:scale-95 transition-transform" id="submitRating">
+              Kirim Rating
+          </button>
+          <button class="w-full bg-transparent text-brand-600 font-medium py-3 rounded-full hover:bg-gray-50 transition-colors" id="closeModal">
+              Nanti saja
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% include "customer/_bottom_nav.html" %}
 </div>
 
@@ -148,6 +204,90 @@
 <script>
   // Auto-refresh tiap 30 detik kalau pesanan masih in-progress
   setTimeout(() => window.location.reload(), 30000);
+</script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if order.status == 'selesai' %}
+<script>
+  // Star Rating Logic
+  const starButtons = document.querySelectorAll('.star-btn');
+  let currentRating = 0;
+
+  starButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+          const rating = parseInt(btn.getAttribute('data-rating'));
+          currentRating = rating;
+          updateStars(rating);
+      });
+
+      btn.addEventListener('mouseenter', () => {
+          const rating = parseInt(btn.getAttribute('data-rating'));
+          updateStars(rating, true);
+      });
+
+      btn.addEventListener('mouseleave', () => {
+          updateStars(currentRating);
+      });
+  });
+
+  function updateStars(rating) {
+      starButtons.forEach((btn, index) => {
+          const starIcon = btn.querySelector('.material-symbols-outlined');
+          if (index < rating) {
+              starIcon.classList.add('star-active');
+              starIcon.classList.remove('text-gray-300');
+          } else {
+              starIcon.classList.remove('star-active');
+              starIcon.classList.add('text-gray-300');
+          }
+      });
+  }
+
+  // Modal Close Logic
+  const modal = document.getElementById('ratingModal');
+  const closeBtn = document.getElementById('closeModal');
+  const submitBtn = document.getElementById('submitRating');
+
+  if(modal) {
+      const closeModal = () => {
+          modal.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => {
+              modal.style.display = 'none';
+          }, 300);
+      };
+
+      closeBtn.addEventListener('click', closeModal);
+      submitBtn.addEventListener('click', () => {
+          if(currentRating === 0) {
+              alert('Silakan pilih rating terlebih dahulu.');
+              return;
+          }
+
+          // Kirim ke backend
+          fetch('{{ url_for("customer.submit_rating", order_code=order.order_code) }}', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ rating: currentRating })
+          })
+          .then(res => res.json())
+          .then(data => {
+              if(data.success) {
+                  alert('Terima kasih atas rating Anda!');
+                  closeModal();
+              } else {
+                  alert(data.message || 'Gagal menyimpan rating');
+              }
+          })
+          .catch(err => {
+              alert('Terjadi kesalahan saat mengirim rating.');
+              console.error(err);
+          });
+      });
+  }
 </script>
 {% endif %}
 {% endblock %}

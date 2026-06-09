@@ -224,3 +224,27 @@ class OrderService:
         return Order.query.filter(
             Order.status == "selesai", Order.created_at >= today_start
         ).count()
+
+    @staticmethod
+    def save_rating(order_code: str, rating_val: int) -> bool:
+        """Simpan rating ke order dan update rata-rata rating menu yang dibeli."""
+        if rating_val < 1 or rating_val > 5:
+            return False
+            
+        order = OrderService.get_by_code(order_code)
+        if not order or order.rating is not None:
+            # Order tidak ada, atau sudah dirating sebelumnya
+            return False
+            
+        order.rating = rating_val
+        
+        # Update rating tiap menu di order ini
+        for item in order.items:
+            if item.menu:
+                if item.menu.rating == 0.0:
+                    item.menu.rating = float(rating_val)
+                else:
+                    item.menu.rating = round((item.menu.rating + rating_val) / 2.0, 1)
+                    
+        db.session.commit()
+        return True
