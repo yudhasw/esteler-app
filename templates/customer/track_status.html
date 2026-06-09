@@ -160,7 +160,7 @@
 
   {% if order.status == 'selesai' %}
   <!-- Rating Modal Overlay -->
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 modal-overlay" id="ratingModal">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 modal-overlay hidden" id="ratingModal">
     <div class="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-2xl transform transition-all animate-in fade-in zoom-in duration-300">
       <div class="text-center">
         <h3 class="text-xl font-bold mb-2">Bagaimana pengalaman Anda?</h3>
@@ -251,6 +251,10 @@
   const submitBtn = document.getElementById('submitRating');
 
   if(modal) {
+      if(!localStorage.getItem('rated_{{ order.order_code }}')) {
+          modal.classList.remove('hidden');
+      }
+
       const closeModal = () => {
           modal.classList.add('opacity-0', 'scale-95');
           setTimeout(() => {
@@ -276,6 +280,7 @@
           .then(res => res.json())
           .then(data => {
               if(data.success) {
+                  localStorage.setItem('rated_{{ order.order_code }}', 'true');
                   alert('Terima kasih atas rating Anda!');
                   closeModal();
               } else {

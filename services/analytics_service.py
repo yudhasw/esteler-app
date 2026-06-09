@@ -37,13 +37,12 @@ class AnalyticsService:
         week_ago = today - timedelta(days=7)
         last_week = today - timedelta(days=14)
 
-        # Hari ini
-        today_revenue, today_orders = db.session.query(
+        # Total Keseluruhan (All time)
+        total_revenue, total_orders = db.session.query(
             func.coalesce(func.sum(Order.total), 0),
             func.count(Order.id),
         ).filter(
-            Order.created_at >= today,
-            Order.status != "dibatalkan",
+            Order.status == "selesai",
         ).first()
 
         # Minggu ini vs minggu lalu (untuk persentase growth)
@@ -51,7 +50,7 @@ class AnalyticsService:
             func.coalesce(func.sum(Order.total), 0)
         ).filter(
             Order.created_at >= week_ago,
-            Order.status != "dibatalkan",
+            Order.status == "selesai",
         ).scalar()
 
         last_week_revenue = db.session.query(
@@ -59,7 +58,7 @@ class AnalyticsService:
         ).filter(
             Order.created_at >= last_week,
             Order.created_at < week_ago,
-            Order.status != "dibatalkan",
+            Order.status == "selesai",
         ).scalar()
 
         # Hitung growth %
@@ -69,8 +68,8 @@ class AnalyticsService:
             growth = 0.0
 
         return {
-            "today_revenue": int(today_revenue or 0),
-            "today_orders": int(today_orders or 0),
+            "total_revenue": int(total_revenue or 0),
+            "total_orders": int(total_orders or 0),
             "week_revenue": int(week_revenue or 0),
             "revenue_growth_percent": round(growth, 1),
             "active_orders": Order.query.filter(
@@ -102,7 +101,7 @@ class AnalyticsService:
             .join(Order, Order.id == OrderItem.order_id)
             .filter(
                 Order.created_at >= since,
-                Order.status != "dibatalkan",
+                Order.status == "selesai",
             )
             .group_by(Menu.id, Menu.name, Menu.image_url, Menu.price)
             .order_by(func.sum(OrderItem.quantity).desc())
@@ -124,10 +123,10 @@ class AnalyticsService:
     @staticmethod
     def get_weekly_revenue() -> List[Dict]:
         """
-        Revenue per hari dalam 7 hari terakhir (untuk chart).
-        SQL GROUP BY date - efisien.
+        Revenue per hari dalam 7 hari terakhir (minggu ini) dan 7 hari sebelumnya (minggu lalu).
         """
-        since = AnalyticsService._today_start() - timedelta(days=6)
+        today = AnalyticsService._today_start()
+        since_last_week = today - timedelta(days=13)
 
         results = (
             db.session.query(
@@ -135,8 +134,8 @@ class AnalyticsService:
                 func.coalesce(func.sum(Order.total), 0).label("revenue"),
             )
             .filter(
-                Order.created_at >= since,
-                Order.status != "dibatalkan",
+                Order.created_at >= since_last_week,
+                Order.status == "selesai",
             )
             .group_by(func.date(Order.created_at))
             .order_by(func.date(Order.created_at))
@@ -150,11 +149,13 @@ class AnalyticsService:
         labels = ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "MIN"]
         output = []
         for i in range(7):
-            d = (AnalyticsService._today_start() - timedelta(days=6 - i)).date()
+            d_this = (today - timedelta(days=6 - i)).date()
+            d_last = (today - timedelta(days=13 - i)).date()
             output.append({
-                "date": str(d),
-                "label": labels[d.weekday()],
-                "revenue": data_map.get(str(d), 0),
+                "date": str(d_this),
+                "label": labels[d_this.weekday()],
+                "revenue": data_map.get(str(d_this), 0),
+                "last_revenue": data_map.get(str(d_last), 0),
             })
         return output
 
@@ -173,7 +174,7 @@ class AnalyticsService:
             )
             .filter(
                 Order.created_at >= since,
-                Order.status != "dibatalkan",
+                Order.status == "selesai",
             )
             .group_by(Order.order_source)
             .all()
@@ -197,7 +198,7 @@ class AnalyticsService:
             )
             .filter(
                 Order.created_at >= since,
-                Order.status != "dibatalkan",
+                Order.status == "selesai",
             )
             .group_by(func.extract("hour", Order.created_at))
             .order_by(func.count(Order.id).desc())

@@ -226,18 +226,20 @@ class OrderService:
         ).count()
 
     @staticmethod
+    def count_completed_all() -> int:
+        """Semua order yang selesai sepanjang waktu."""
+        return Order.query.filter(Order.status == "selesai").count()
+
+    @staticmethod
     def save_rating(order_code: str, rating_val: int) -> bool:
-        """Simpan rating ke order dan update rata-rata rating menu yang dibeli."""
+        """Update rata-rata rating menu yang dibeli."""
         if rating_val < 1 or rating_val > 5:
             return False
             
         order = OrderService.get_by_code(order_code)
-        if not order or order.rating is not None:
-            # Order tidak ada, atau sudah dirating sebelumnya
+        if not order:
             return False
             
-        order.rating = rating_val
-        
         # Update rating tiap menu di order ini
         for item in order.items:
             if item.menu:

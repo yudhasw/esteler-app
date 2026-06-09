@@ -3,13 +3,15 @@ Routes Admin - panel pengelolaan penjual
 Semua route dilindungi @login_required
 """
 from flask import (
-    Blueprint, request, redirect, url_for, render_template, flash, jsonify,
+    Blueprint, request, redirect, url_for, render_template, flash, jsonify, send_file
 )
 from flask_login import login_required, current_user
 
 from services.menu_service import MenuService
 from services.order_service import OrderService
 from services.analytics_service import AnalyticsService
+from models import Order
+import io
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -42,7 +44,7 @@ def menu_management():
     summary = {
         "total": len(menus),
         "active": sum(1 for m in menus if m.is_active),
-        "completed_today": OrderService.count_completed_today(),
+        "completed_all": OrderService.count_completed_all(),
     }
     return render_template("admin/menu_list.html", menus=menus, summary=summary)
 
@@ -183,3 +185,93 @@ def walkin_order():
 
     menus = MenuService.get_all(active_only=True)
     return render_template("admin/walkin.html", menus=menus)
+
+# ====================== REPORT DOWNLOAD ======================
+@admin_bp.route("/report/download")
+@login_required
+def download_report():
+    import openpyxl
+    from openpyxl.styles import Font, Alignment, PatternFill
+    
+    # 1. Ambil data order terbaru
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    
+    # 2. Buat workbook excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Laporan Penjualan"
+    
+    # Header kolom
+    headers = [
+        "Tanggal", "Kode Pesanan", "Nama Pelanggan", "Kontak", 
+        "Tipe Order", "Sumber", "Status", "Metode Bayar", "Menu Dipesan", "Total (Rp)"
+    ]
+    ws.append(headers)
+    
+    # Styling header (Warna Hijau Brand)
+    header_fill = PatternFill(start_color="16A34A", end_color="16A34A", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    align_center = Alignment(horizontal="center", vertical="center")
+    
+    for col in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = align_center
+    
+    # Isi data baris per baris
+    for o in orders:
+        menu_details = ", ".join([f"{item.menu.name if item.menu else 'Menu'} ({item.quantity}x)" for item in o.items])
+        
+        # Jika pesanan belum selesai, pendapatannya 0
+        revenue = o.total if o.status and o.status.lower() == "selesai" else 0
+        
+        ws.append([
+            o.created_at.strftime("%Y-%m-%d %H:%M") if o.created_at else "-",
+            o.order_code,
+            o.customer_name or "-",
+            o.customer_contact or "-",
+            o.order_type.upper() if o.order_type else "-",
+            o.order_source,
+            o.status.upper(),
+            o.payment_method,
+            menu_details,
+            revenue
+        ])
+        
+    # Tambahkan baris Total Pendapatan di bawah
+    # Kita hitung langsung di Python agar nilainya pasti muncul tanpa perlu bergantung pada kalkulasi otomatis Excel
+    total_pendapatan = sum(o.total for o in orders if o.status and o.status.lower() == "selesai")
+    last_data_row = len(orders) + 1
+    
+    ws.append(["", "", "", "", "", "", "", "", "Total Pendapatan:", total_pendapatan])
+    
+    total_row_idx = last_data_row + 1
+    ws.cell(row=total_row_idx, column=9).font = Font(bold=True)
+    ws.cell(row=total_row_idx, column=10).font = Font(bold=True)
+        
+    # Auto-adjust lebar kolom biar rapi
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter # A, B, C, dst.
+        for cell in col:
+            try:
+                if cell.value and len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        # Tambah margin sedikit
+        ws.column_dimensions[column].width = max_length + 2
+        
+    # Simpan file ke in-memory buffer (tidak perlu save ke harddisk)
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    # Kirim file ke browser
+    return send_file(
+        output,
+        download_name="Laporan_Penjualan_Dapur_Hijrah.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
