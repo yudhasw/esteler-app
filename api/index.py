@@ -20,6 +20,7 @@ from flask import Flask, session
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+import cloudinary
 
 load_dotenv()
 
@@ -41,6 +42,14 @@ def create_app() -> Flask:
     # Inisialisasi extensions
     db.init_app(app)
     Migrate(app, db)
+
+    # Cloudinary - storage gambar menu
+    cloudinary.config(
+        cloud_name=app.config.get("CLOUDINARY_CLOUD_NAME"),
+        api_key=app.config.get("CLOUDINARY_API_KEY"),
+        api_secret=app.config.get("CLOUDINARY_API_SECRET"),
+        secure=True,
+    )
 
     # Flask-Login
     login_manager = LoginManager()

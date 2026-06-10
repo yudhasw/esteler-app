@@ -67,5 +67,10 @@ class Config:
     SESSION_COOKIE_SAMESITE = "Lax"
     PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 7  # 7 hari
 
-    # Upload (kalau pakai Vercel Blob nanti)
+    # Upload
     MAX_CONTENT_LENGTH = 4 * 1024 * 1024  # 4MB (Vercel Hobby limit: 4.5MB)
+
+    # Cloudinary - storage gambar menu (free tier, lihat https://cloudinary.com/pricing)
+    CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")

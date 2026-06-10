@@ -10,6 +10,7 @@ from flask_login import login_required, current_user
 from services.menu_service import MenuService
 from services.order_service import OrderService
 from services.analytics_service import AnalyticsService
+from services.upload_service import UploadService
 from models import Order
 import io
 
@@ -54,12 +55,17 @@ def menu_management():
 def menu_create():
     if request.method == "POST":
         try:
+            image_url = request.form.get("image_url", "").strip()
+            uploaded_url = UploadService.upload_menu_image(request.files.get("image_file"))
+            if uploaded_url:
+                image_url = uploaded_url
+
             MenuService.create({
                 "name": request.form.get("name", "").strip(),
                 "description": request.form.get("description", "").strip(),
                 "price": int(request.form.get("price", 0)),
                 "category": request.form.get("category", "Original"),
-                "image_url": request.form.get("image_url", "").strip(),
+                "image_url": image_url,
                 "is_active": request.form.get("is_active") == "on",
                 "is_best_seller": request.form.get("is_best_seller") == "on",
                 "is_favorite": request.form.get("is_favorite") == "on",
@@ -80,18 +86,26 @@ def menu_edit(menu_id):
         return redirect(url_for("admin.menu_management"))
 
     if request.method == "POST":
-        MenuService.update(menu_id, {
-            "name": request.form.get("name", "").strip(),
-            "description": request.form.get("description", "").strip(),
-            "price": int(request.form.get("price", menu.price)),
-            "category": request.form.get("category", menu.category),
-            "image_url": request.form.get("image_url", menu.image_url),
-            "is_active": request.form.get("is_active") == "on",
-            "is_best_seller": request.form.get("is_best_seller") == "on",
-            "is_favorite": request.form.get("is_favorite") == "on",
-        })
-        flash("Menu berhasil diperbarui.", "success")
-        return redirect(url_for("admin.menu_management"))
+        try:
+            image_url = request.form.get("image_url", menu.image_url)
+            uploaded_url = UploadService.upload_menu_image(request.files.get("image_file"))
+            if uploaded_url:
+                image_url = uploaded_url
+
+            MenuService.update(menu_id, {
+                "name": request.form.get("name", "").strip(),
+                "description": request.form.get("description", "").strip(),
+                "price": int(request.form.get("price", menu.price)),
+                "category": request.form.get("category", menu.category),
+                "image_url": image_url,
+                "is_active": request.form.get("is_active") == "on",
+                "is_best_seller": request.form.get("is_best_seller") == "on",
+                "is_favorite": request.form.get("is_favorite") == "on",
+            })
+            flash("Menu berhasil diperbarui.", "success")
+            return redirect(url_for("admin.menu_management"))
+        except (ValueError, KeyError) as e:
+            flash(f"Data tidak valid: {e}", "danger")
 
     return render_template("admin/menu_form.html", menu=menu)
 
