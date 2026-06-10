@@ -38,12 +38,24 @@ class AnalyticsService:
         last_week = today - timedelta(days=14)
 
         # Total Keseluruhan (All time)
-        total_revenue, total_orders = db.session.query(
-            func.coalesce(func.sum(Order.total), 0),
-            func.count(Order.id),
+        total_revenue = db.session.query(
+            func.coalesce(func.sum(Order.total), 0)
         ).filter(
             Order.status == "selesai",
-        ).first()
+        ).scalar()
+        
+        total_orders = db.session.query(
+            func.coalesce(func.sum(OrderItem.quantity), 0)
+        ).join(Order, Order.id == OrderItem.order_id).filter(
+            Order.status == "selesai",
+        ).scalar()
+        
+        # Kepuasan (Average rating menu)
+        satisfaction = db.session.query(
+            func.avg(Menu.rating)
+        ).filter(Menu.rating > 0).scalar()
+        satisfaction_score = round(satisfaction, 1) if satisfaction else 0.0
+        satisfaction_percent = int((satisfaction_score / 5.0) * 100) if satisfaction_score > 0 else 0
 
         # Minggu ini vs minggu lalu (untuk persentase growth)
         week_revenue = db.session.query(
@@ -79,6 +91,8 @@ class AnalyticsService:
             "completed_today": Order.query.filter(
                 Order.status == "selesai", Order.created_at >= today
             ).count(),
+            "satisfaction_score": satisfaction_score,
+            "satisfaction_percent": satisfaction_percent,
         }
 
     @staticmethod
