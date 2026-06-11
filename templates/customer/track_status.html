@@ -201,9 +201,104 @@
 </div>
 
 {% if order.status in ['menunggu', 'memasak'] %}
+<!-- Modal Reminder WA -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6 modal-overlay hidden" id="waReminderModal">
+  <div class="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-2xl">
+    <div class="text-center">
+      <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="message-circle" class="w-7 h-7 text-green-600"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Jangan lupa konfirmasi!</h3>
+      <p class="text-sm text-gray-500 mb-6">
+        Hubungi penjual via WhatsApp untuk konfirmasi pembayaran pesanan
+        <span class="font-semibold text-gray-900">{{ order.order_code }}</span>.
+      </p>
+      <div class="flex flex-col gap-3">
+        <a href="https://wa.me/6289608154576?text=Halo,%20saya%20mau%20konfirmasi%20pembayaran%20pesanan%20{{ order.order_code }}"
+           target="_blank"
+           class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3.5 rounded-2xl flex items-center justify-center gap-2">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          Hubungi via WhatsApp
+        </a>
+        <button id="closeWaModal"
+                class="w-full text-gray-500 font-medium py-3 rounded-2xl hover:bg-gray-50">
+          Nanti saja
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
+  
   // Auto-refresh tiap 30 detik kalau pesanan masih in-progress
   setTimeout(() => window.location.reload(), 30000);
+  const waModal = document.getElementById('waReminderModal');
+
+  const waKey = 'wa_contacted_{{ order.order_code }}';
+
+  // Cek apakah sudah pernah hubungi WA
+  if (localStorage.getItem(waKey)) {
+    showWaitingBanner();
+  }
+
+  document.querySelectorAll('a[href]').forEach(link => {
+    if (link.href.includes('wa.me')) return;
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      waModal.classList.remove('hidden');
+    });
+  });
+
+  // Saat klik tombol WA — tandai sudah dihubungi
+  document.querySelector('#waReminderModal a[href*="wa.me"]').addEventListener('click', () => {
+    localStorage.setItem(waKey, 'true');
+    setTimeout(() => {
+      waModal.classList.add('hidden');
+      showWaitingBanner();
+    }, 500);
+  });
+
+  document.getElementById('closeWaModal').addEventListener('click', () => {
+    waModal.classList.add('hidden');
+  });
+
+  waModal.addEventListener('click', function (e) {
+    if (e.target === waModal) waModal.classList.add('hidden');
+  });
+
+  function showWaitingBanner() {
+    // Hapus banner lama kalau ada
+    const old = document.getElementById('waitingBanner');
+    if (old) old.remove();
+
+    const banner = document.createElement('div');
+    banner.id = 'waitingBanner';
+    banner.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="font-semibold text-green-800 text-sm">Sudah menghubungi penjual!</p>
+          <p class="text-xs text-green-700 mt-0.5">Tunggu konfirmasi dari admin. Halaman ini otomatis update tiap 30 detik.</p>
+        </div>
+      </div>
+      <button onclick="
+        localStorage.removeItem('${waKey}');
+        this.closest('#waitingBanner').remove();
+        document.getElementById('waReminderModal').classList.remove('hidden');
+      " class="mt-3 w-full text-center text-xs text-green-700 underline">
+        Belum hubungi? Buka WhatsApp lagi
+      </button>
+    `;
+    banner.className = 'mx-4 mb-4 bg-green-50 border border-green-200 rounded-2xl p-4';
+
+    // Sisipkan setelah card header pesanan
+    const firstCard = document.querySelector('.px-4.pt-4 > .bg-white');
+    firstCard.insertAdjacentElement('afterend', banner);
+  }
 </script>
 {% endif %}
 {% endblock %}
