@@ -11,7 +11,7 @@ from services.menu_service import MenuService
 from services.order_service import OrderService
 from services.analytics_service import AnalyticsService
 from services.upload_service import UploadService
-from models import Order
+from models import Order, OrderItem
 import io
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -289,3 +289,23 @@ def download_report():
         as_attachment=True,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+# ====================== PRINT RECEIPT ======================
+@admin_bp.route("/orders/<int:order_id>/receipt")
+@login_required
+def print_receipt(order_id):
+    from sqlalchemy.orm import joinedload
+    order = (
+        Order.query.options(joinedload(Order.items).joinedload(OrderItem.menu))
+        .filter_by(id=order_id)
+        .first()
+    )
+    if not order:
+        flash("Pesanan tidak ditemukan.", "danger")
+        return redirect(url_for("admin.order_list"))
+    if order.status != "selesai":
+        flash("Nota hanya dapat dicetak untuk pesanan yang sudah selesai.", "warning")
+        return redirect(url_for("admin.order_list"))
+    return render_template("admin/receipt.html", order=order)
+

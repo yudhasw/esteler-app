@@ -96,7 +96,7 @@
 
         <form method="POST" action="{{ url_for('admin.cancel_order', order_id=order.id) }}">
           <button type="submit"
-                  class="px-3 py-2.5 bg-gray-100 text-gray-700 rounded-xl"
+                  class="px-3 py-2.5 bg-gray-100 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                   title="Batalkan"
                   onclick="return confirm('Yakin batalkan order ini?')">
             <i data-lucide="x" class="w-4 h-4"></i>
@@ -125,9 +125,18 @@
         <p class="text-xs text-gray-500">{{ order.order_code }}</p>
       </div>
       {% set color = order.status | status_color %}
-      <div class="text-right">
-        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-{{ color }}-100 text-{{ color }}-700">{{ order.status }}</span>
-        <p class="text-xs font-bold text-gray-900 mt-1">{{ order.total | rupiah }}</p>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-{{ color }}-100 text-{{ color }}-700">{{ order.status }}</span>
+          <p class="text-xs font-bold text-gray-900 mt-1">{{ order.total | rupiah }}</p>
+        </div>
+        {% if order.status == 'selesai' %}
+        <a href="{{ url_for('admin.print_receipt', order_id=order.id) }}" target="_blank"
+           class="text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-xl transition-colors"
+           title="Cetak Nota">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

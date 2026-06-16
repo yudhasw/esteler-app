@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nota_{{ order.order_code }}</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Styling khusus cetak */
+    @media print {
+      body {
+        background-color: #ffffff;
+        color: #000000;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 10px !important;
+        margin: 0 !important;
+      }
+      hr {
+        border-top: 1px dashed #000000 !important;
+      }
+    }
+
+    /* Gaya default di layar browser (screen preview) */
+    @media screen {
+      body {
+        background-color: #f3f4f6;
+        font-family: 'Courier New', Courier, monospace;
+      }
+      .print-container {
+        max-width: 400px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+  <!-- Control Buttons (Hanya muncul di browser layar) -->
+  <div class="no-print max-w-[400px] mx-auto mt-6 px-4 flex gap-3">
+    <button onclick="window.print()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors text-sm">
+      <i data-lucide="printer" class="w-4 h-4"></i>
+      Cetak Nota
+    </button>
+    <button onclick="window.close()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors text-sm">
+      <i data-lucide="x" class="w-4 h-4"></i>
+      Tutup Halaman
+    </button>
+  </div>
+
+  <!-- Receipt Container -->
+  <div class="print-container text-xs">
+    
+    <!-- Receipt Header -->
+    <div class="text-center mb-4">
+      <h1 class="text-xl font-bold tracking-wider uppercase text-black">DAPUR HIJRAH</h1>
+      <p class="text-[10px] text-gray-500">Jl. Telekomunikasi No. 1, Bandung</p>
+      <p class="text-[10px] text-gray-500">Telp: 0812-3456-7890</p>
+      <hr class="border-t border-dashed border-gray-400 my-3">
+    </div>
+
+    <!-- Order Info -->
+    <div class="space-y-1 mb-4 text-[11px]">
+      <div class="flex justify-between">
+        <span>KODE ORDER:</span>
+        <span class="font-bold text-black">{{ order.order_code }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span>TANGGAL:</span>
+        <span>{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else '-' }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span>PELANGGAN:</span>
+        <span class="font-semibold text-black">{{ order.customer_name or 'Walk-in' }}</span>
+      </div>
+      {% if order.customer_contact %}
+      <div class="flex justify-between">
+        <span>KONTAK:</span>
+        <span>{{ order.customer_contact }}</span>
+      </div>
+      {% endif %}
+      <div class="flex justify-between">
+        <span>TIPE ORDER:</span>
+        <span class="uppercase">{{ order.order_type }} ({{ order.order_source }})</span>
+      </div>
+      {% if order.pickup_schedule %}
+      <div class="flex justify-between text-brand-700">
+        <span>JADWAL AMBIL:</span>
+        <span class="font-semibold">{{ order.pickup_schedule.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+      {% endif %}
+      <hr class="border-t border-dashed border-gray-400 my-3">
+    </div>
+
+    <!-- Items Table -->
+    <div class="space-y-2 mb-4">
+      <div class="flex justify-between font-bold text-black text-[11px] mb-1">
+        <span>Menu / Qty</span>
+        <span>Subtotal</span>
+      </div>
+      {% for item in order.items %}
+      <div class="text-[11px]">
+        <div class="flex justify-between">
+          <span>{{ item.quantity }}x {{ item.menu.name if item.menu else '-' }}</span>
+          <span>{{ item.subtotal | rupiah }}</span>
+        </div>
+        <div class="text-[9px] text-gray-500 pl-4">
+          @ {{ item.price_at_order | rupiah }}
+        </div>
+      </div>
+      {% endfor %}
+      <hr class="border-t border-dashed border-gray-400 my-3">
+    </div>
+
+    <!-- Totals and Payment -->
+    <div class="space-y-1 text-[11px] mb-4">
+      <div class="flex justify-between text-base font-bold text-black">
+        <span>TOTAL BELANJA</span>
+        <span>{{ order.total | rupiah }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span>METODE BAYAR:</span>
+        <span class="font-semibold text-black uppercase">{{ order.payment_method }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span>STATUS PESANAN:</span>
+        <span class="font-bold uppercase text-black">{{ order.status }}</span>
+      </div>
+      {% if order.note %}
+      <div class="mt-2 text-[10px] bg-gray-50 p-1.5 border border-dashed border-gray-200 rounded">
+        <span class="font-bold">CATATAN:</span> {{ order.note }}
+      </div>
+      {% endif %}
+      <hr class="border-t border-dashed border-gray-400 my-3">
+    </div>
+
+    <!-- Footer message -->
+    <div class="text-center text-[10px] space-y-1">
+      <p class="font-semibold text-black">Terima Kasih Atas Kunjungan Anda</p>
+      <p class="text-gray-500">Dapur Hijrah - Segar & Nikmat</p>
+      <p class="text-[8px] text-gray-400 mt-2">Powered by Esteler App</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+    
+    // Otomatis cetak saat halaman termuat penuh
+    window.onload = function() {
+      // Tunggu 500ms agar rendering font & ikon selesai sebelum dialog print muncul
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
