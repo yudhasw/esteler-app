@@ -88,6 +88,10 @@
 
   </div>
 
+  {% if request.blueprint == 'customer' %}
+    {% include 'customer/_chatbot.html' %}
+  {% endif %}
+
   <script>
     // Inisialisasi icons
     if (window.lucide) lucide.createIcons();

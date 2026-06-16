@@ -1,0 +1,554 @@
+{# Chatbot Widget - FAB + panel chat "Asisten Dapur Hijrah" #} {# Perubahan:
+draft card dihapus, diganti checkout panel yang muncul otomatis #}
+
+<button
+  id="chatbot-fab"
+  type="button"
+  class="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-brand-600 text-white shadow-card flex items-center justify-center hover:bg-brand-700 transition-colors"
+  aria-label="Buka chat asisten"
+>
+  <i data-lucide="message-circle" class="w-6 h-6"></i>
+</button>
+
+{# Panel Chat #}
+<div id="chatbot-panel" class="fixed inset-0 z-50 hidden">
+  <div id="chatbot-backdrop" class="absolute inset-0 bg-black/30"></div>
+
+  <div
+    class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-card h-[85vh] flex flex-col overflow-hidden"
+  >
+    <div
+      class="flex items-center justify-between px-4 py-3 bg-brand-600 text-white flex-shrink-0"
+    >
+      <div class="flex items-center gap-2">
+        <i data-lucide="bot" class="w-5 h-5"></i>
+        <span class="font-bold text-sm">Asisten Dapur Hijrah</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          id="chatbot-reset"
+          type="button"
+          class="p-1 rounded-full hover:bg-white/20"
+          aria-label="Mulai chat baru"
+        >
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+        <button
+          id="chatbot-close"
+          type="button"
+          class="p-1 rounded-full hover:bg-white/20"
+          aria-label="Tutup chat"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="chatbot-messages"
+      class="flex-1 overflow-y-auto px-4 py-3 space-y-3 hide-scrollbar bg-cream"
+    ></div>
+
+    <form
+      id="chatbot-form"
+      class="flex items-center gap-2 border-t border-gray-200 bg-white px-3 py-2 flex-shrink-0"
+    >
+      <input
+        id="chatbot-input"
+        type="text"
+        autocomplete="off"
+        placeholder="Tulis pesan..."
+        class="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+      />
+      <button
+        type="submit"
+        id="chatbot-send"
+        class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center flex-shrink-0 hover:bg-brand-700 disabled:opacity-50"
+      >
+        <i data-lucide="send" class="w-4 h-4"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+{# Checkout Panel - muncul di atas chatbot panel saat show_checkout=true #}
+<div id="checkout-panel" class="fixed inset-0 z-[60] hidden">
+  <div id="checkout-backdrop" class="absolute inset-0 bg-black/50"></div>
+
+  <div
+    class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-card max-h-[90vh] flex flex-col overflow-hidden"
+  >
+    <div
+      class="flex items-center justify-between px-4 py-3 bg-brand-600 text-white flex-shrink-0"
+    >
+      <div class="flex items-center gap-2">
+        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        <span class="font-bold text-sm">Checkout</span>
+      </div>
+      <button
+        id="checkout-close"
+        type="button"
+        class="p-1 rounded-full hover:bg-white/20"
+        aria-label="Tutup checkout"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4 hide-scrollbar">
+      {# Ringkasan keranjang #}
+      <div>
+        <p
+          class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2"
+        >
+          Pesananmu
+        </p>
+        <div id="checkout-items" class="space-y-1.5"></div>
+        <div
+          class="flex justify-between text-sm font-bold text-gray-900 border-t border-gray-100 mt-2 pt-2"
+        >
+          <span>Total</span>
+          <span id="checkout-total">Rp0</span>
+        </div>
+      </div>
+
+      {# Form data pelanggan #}
+      <div class="space-y-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Data Pemesan
+        </p>
+
+        <div>
+          <label class="block text-xs text-gray-600 mb-1" for="co-nama"
+            >Nama</label
+          >
+          <input
+            id="co-nama"
+            type="text"
+            placeholder="Nama lengkap"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-600 mb-1" for="co-kontak"
+            >Nomor HP</label
+          >
+          <input
+            id="co-kontak"
+            type="tel"
+            placeholder="08xxxxxxxxxx"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-600 mb-1" for="co-tipe"
+            >Tipe Pesanan</label
+          >
+          <select
+            id="co-tipe"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          >
+            <option value="pickup">Pickup</option>
+            <option value="delivery">Delivery</option>
+            <option value="dine-in">Dine-in</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-600 mb-1" for="co-bayar"
+            >Metode Pembayaran</label
+          >
+          <select
+            id="co-bayar"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          >
+            <option value="TUNAI">Tunai</option>
+            <option value="QRIS">QRIS</option>
+            <option value="COD">COD</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-600 mb-1" for="co-catatan"
+            >Catatan (opsional)</label
+          >
+          <input
+            id="co-catatan"
+            type="text"
+            placeholder="Misal: kurangi es, tambah susu..."
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 py-3 border-t border-gray-100 flex-shrink-0">
+      <p id="checkout-error" class="text-xs text-red-500 mb-2 hidden"></p>
+      <button
+        id="checkout-submit"
+        type="button"
+        class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 disabled:opacity-50 text-sm"
+      >
+        Pesan Sekarang
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const STORAGE_KEY = "dapurhijrah_chat_history";
+    const CHAT_URL = "{{ url_for('customer.chat') }}";
+    const ORDER_URL = "{{ url_for('customer.create_order') }}";
+    const TRACK_URL_TEMPLATE =
+      "{{ url_for('customer.track_status', code='__CODE__') }}";
+
+    const QUICK_REPLIES = [
+      "Lihat menu",
+      "Rekomendasi untukku",
+      "Lacak pesanan saya",
+    ];
+
+    // ─── Refs ───────────────────────────────────────────────────────────────────
+    const fab = document.getElementById("chatbot-fab");
+    const panel = document.getElementById("chatbot-panel");
+    const backdrop = document.getElementById("chatbot-backdrop");
+    const closeBtn = document.getElementById("chatbot-close");
+    const resetBtn = document.getElementById("chatbot-reset");
+    const messagesEl = document.getElementById("chatbot-messages");
+    const form = document.getElementById("chatbot-form");
+    const input = document.getElementById("chatbot-input");
+    const sendBtn = document.getElementById("chatbot-send");
+
+    const checkoutPanel = document.getElementById("checkout-panel");
+    const checkoutBackdrop = document.getElementById("checkout-backdrop");
+    const checkoutClose = document.getElementById("checkout-close");
+    const checkoutItems = document.getElementById("checkout-items");
+    const checkoutTotal = document.getElementById("checkout-total");
+    const checkoutSubmit = document.getElementById("checkout-submit");
+    const checkoutError = document.getElementById("checkout-error");
+
+    // ─── History ─────────────────────────────────────────────────────────────────
+    function getHistory() {
+      try {
+        return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function saveHistory(h) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(h));
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────────
+    function escapeHtml(text) {
+      const d = document.createElement("div");
+      d.textContent = text == null ? "" : String(text);
+      return d.innerHTML;
+    }
+
+    function formatRupiah(n) {
+      return "Rp" + Number(n || 0).toLocaleString("id-ID");
+    }
+
+    function linkify(text) {
+      return escapeHtml(text)
+        .replace(/\n/g, "<br>")
+        .replace(/ORD-\d{8}-[A-Z0-9]{4}/g, function (code) {
+          const url = TRACK_URL_TEMPLATE.replace("__CODE__", code);
+          return (
+            '<a href="' +
+            url +
+            '" class="underline font-semibold">' +
+            code +
+            "</a>"
+          );
+        });
+    }
+
+    // ─── Chat UI ─────────────────────────────────────────────────────────────────
+    function addBubble(role, text) {
+      const wrap = document.createElement("div");
+      wrap.className =
+        "flex " + (role === "user" ? "justify-end" : "justify-start");
+
+      const bubble = document.createElement("div");
+      bubble.className =
+        "max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed " +
+        (role === "user"
+          ? "bg-brand-600 text-white rounded-br-sm"
+          : "bg-white text-gray-800 border border-gray-100 shadow-soft rounded-bl-sm");
+      bubble.innerHTML = linkify(text);
+
+      wrap.appendChild(bubble);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addTyping() {
+      const wrap = document.createElement("div");
+      wrap.id = "chatbot-typing";
+      wrap.className = "flex justify-start";
+      wrap.innerHTML =
+        '<div class="bg-white border border-gray-100 shadow-soft rounded-2xl rounded-bl-sm px-4 py-2.5 flex gap-1">' +
+        '<span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>' +
+        '<span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0.15s"></span>' +
+        '<span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0.3s"></span>' +
+        "</div>";
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById("chatbot-typing");
+      if (el) el.remove();
+    }
+
+    function removeQuickReplies() {
+      const el = document.getElementById("chatbot-quick-replies");
+      if (el) el.remove();
+    }
+
+    function addQuickReplies() {
+      removeQuickReplies();
+      const wrap = document.createElement("div");
+      wrap.id = "chatbot-quick-replies";
+      wrap.className = "flex flex-wrap gap-2";
+      QUICK_REPLIES.forEach(function (text) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className =
+          "px-3 py-1.5 rounded-full border border-brand-200 bg-white text-brand-700 text-xs font-semibold hover:bg-brand-50 transition-colors";
+        chip.textContent = text;
+        chip.addEventListener("click", function () {
+          sendMessage(text);
+        });
+        wrap.appendChild(chip);
+      });
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addCheckoutButton() {
+      if (document.getElementById("chatbot-checkout-btn")) return;
+      const wrap = document.createElement("div");
+      wrap.className = "flex justify-start";
+      const btn = document.createElement("button");
+      btn.id = "chatbot-checkout-btn";
+      btn.type = "button";
+      btn.className =
+        "flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white text-sm font-bold rounded-2xl rounded-bl-sm hover:bg-brand-700 transition-colors shadow-soft";
+      btn.innerHTML =
+        '<i data-lucide="shopping-bag" class="w-4 h-4"></i> Lanjut ke Checkout';
+      btn.addEventListener("click", openCheckout);
+      wrap.appendChild(btn);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderHistory() {
+      messagesEl.innerHTML = "";
+      const history = getHistory();
+      if (history.length === 0) {
+        addBubble(
+          "assistant",
+          "Halo! Saya asisten Dapur Hijrah \u{1F60A}\nAda yang bisa saya bantu? Saya bisa bantu cari menu, kasih rekomendasi, atau atur keranjang belanjamu.",
+        );
+        addQuickReplies();
+        return;
+      }
+      history.forEach(function (m) {
+        addBubble(m.role, m.content);
+      });
+    }
+
+    function openPanel() {
+      panel.classList.remove("hidden");
+      renderHistory();
+      if (window.lucide) lucide.createIcons();
+      setTimeout(function () {
+        input.focus();
+      }, 100);
+    }
+
+    function closePanel() {
+      panel.classList.add("hidden");
+    }
+
+    function sendMessage(text) {
+      text = (text || "").trim();
+      if (!text) return;
+
+      removeQuickReplies();
+      addBubble("user", text);
+      input.value = "";
+      input.disabled = true;
+      sendBtn.disabled = true;
+      addTyping();
+
+      fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history: getHistory() }),
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (data) {
+          removeTyping();
+          addBubble(
+            "assistant",
+            data.reply || "Maaf, terjadi kesalahan. Coba lagi.",
+          );
+          if (data.history) saveHistory(data.history);
+          if (data.show_checkout) addCheckoutButton();
+        })
+        .catch(function () {
+          removeTyping();
+          addBubble(
+            "assistant",
+            "Maaf, koneksi ke asisten gagal. Coba lagi sebentar.",
+          );
+        })
+        .finally(function () {
+          input.disabled = false;
+          sendBtn.disabled = false;
+          input.focus();
+        });
+    }
+
+    function formatRupiahId(n) {
+      return "Rp" + Number(n || 0).toLocaleString("id-ID");
+    }
+
+    function openCheckout() {
+      fetch("{{ url_for('customer.cart_summary') }}")
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (cart) {
+          checkoutItems.innerHTML = "";
+          (cart.items || []).forEach(function (item) {
+            const row = document.createElement("div");
+            row.className = "flex justify-between text-sm text-gray-700";
+            row.innerHTML =
+              "<span>" +
+              escapeHtml(item.name) +
+              " <span class='text-gray-400'>x" +
+              item.quantity +
+              "</span></span>" +
+              "<span class='font-medium'>" +
+              formatRupiahId(item.subtotal) +
+              "</span>";
+            checkoutItems.appendChild(row);
+          });
+          checkoutTotal.textContent = formatRupiahId(cart.total_price);
+
+          // Bersihkan form & error
+          document.getElementById("co-nama").value = "";
+          document.getElementById("co-kontak").value = "";
+          document.getElementById("co-tipe").value = "pickup";
+          document.getElementById("co-bayar").value = "TUNAI";
+          document.getElementById("co-catatan").value = "";
+          checkoutError.classList.add("hidden");
+          checkoutSubmit.disabled = false;
+
+          checkoutPanel.classList.remove("hidden");
+          if (window.lucide) lucide.createIcons();
+          document.getElementById("co-nama").focus();
+        })
+        .catch(function () {
+          addBubble(
+            "assistant",
+            "Maaf, gagal memuat data keranjang. Coba lagi.",
+          );
+        });
+    }
+
+    function closeCheckout() {
+      checkoutPanel.classList.add("hidden");
+    }
+
+    checkoutClose.addEventListener("click", closeCheckout);
+    checkoutBackdrop.addEventListener("click", closeCheckout);
+
+    checkoutSubmit.addEventListener("click", function () {
+      const nama = document.getElementById("co-nama").value.trim();
+      const kontak = document.getElementById("co-kontak").value.trim();
+      const tipe = document.getElementById("co-tipe").value;
+      const bayar = document.getElementById("co-bayar").value;
+      const catatan = document.getElementById("co-catatan").value.trim();
+
+      // Validasi sederhana di client
+      if (!nama) {
+        showCheckoutError("Nama wajib diisi.");
+        return;
+      }
+      if (!kontak || kontak.replace(/\D/g, "").length < 8) {
+        showCheckoutError("Nomor HP tidak valid.");
+        return;
+      }
+
+      checkoutSubmit.disabled = true;
+      checkoutError.classList.add("hidden");
+
+      fetch(ORDER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: nama,
+          contact: kontak,
+          order_type: tipe,
+          payment_method: bayar,
+          note: catatan,
+        }),
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (data) {
+          if (data.success) {
+            closeCheckout();
+            closePanel();
+            sessionStorage.removeItem(STORAGE_KEY);
+            window.location.href = TRACK_URL_TEMPLATE.replace(
+              "__CODE__",
+              data.order_code,
+            );
+          } else {
+            showCheckoutError(
+              data.message || "Gagal membuat pesanan. Coba lagi.",
+            );
+            checkoutSubmit.disabled = false;
+          }
+        })
+        .catch(function () {
+          showCheckoutError("Koneksi gagal. Coba lagi.");
+          checkoutSubmit.disabled = false;
+        });
+    });
+
+    function showCheckoutError(msg) {
+      checkoutError.textContent = msg;
+      checkoutError.classList.remove("hidden");
+    }
+
+    fab.addEventListener("click", openPanel);
+    closeBtn.addEventListener("click", closePanel);
+    backdrop.addEventListener("click", closePanel);
+
+    resetBtn.addEventListener("click", function () {
+      sessionStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+      input.focus();
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      sendMessage(input.value);
+    });
+  })();
+</script>

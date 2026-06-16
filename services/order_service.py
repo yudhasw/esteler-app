@@ -167,10 +167,16 @@ class OrderService:
 
     @staticmethod
     def get_by_code(order_code: str) -> Optional[Order]:
-        """Ambil order + items + menu dalam SATU query (eager loading)."""
+        """Ambil order + items + menu dalam SATU query (eager loading).
+
+        Lookup case-insensitive karena kode pesanan kadang ditulis ulang
+        dengan huruf besar/kecil berbeda (misal oleh chatbot atau saat
+        diketik manual oleh pelanggan di /track).
+        """
+        code = (order_code or "").strip().upper()
         return (
             Order.query.options(joinedload(Order.items).joinedload(OrderItem.menu))
-            .filter_by(order_code=order_code)
+            .filter(func.upper(Order.order_code) == code)
             .first()
         )
 

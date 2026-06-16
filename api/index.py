@@ -87,6 +87,11 @@ def create_app() -> Flask:
             return "Rp0"
         return f"Rp{int(value):,}".replace(",", ".")
 
+    @app.template_filter("to_wib")
+    def to_wib(dt, fmt="%H:%M"):
+        from datetime import timedelta
+        return (dt + timedelta(hours=7)).strftime(fmt)
+
     @app.template_filter("status_color")
     def status_color(status):
         """Mapping status order ke warna badge."""
