@@ -1,70 +1,90 @@
-{% extends "admin/_layout_admin.html" %}
-{% set active_nav = 'orders' %}
-{% block title %}Kelola Order · Dapur Hijrah{% endblock %}
-
-{% block content %}
+{% extends "admin/_layout_admin.html" %} {% set active_nav = 'orders' %} {%
+block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
 <div class="px-4 pt-4">
-
   <!-- Tab Switcher -->
   <div class="flex bg-white rounded-2xl p-1 mb-5 shadow-soft">
-    <a href="{{ url_for('admin.menu_management') }}" class="flex-1 py-2.5 text-gray-600 font-semibold text-sm text-center">Kelola Menu</a>
-    <button class="flex-1 py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-sm">Kelola Order</button>
+    <a
+      href="{{ url_for('admin.menu_management') }}"
+      class="flex-1 py-2.5 text-gray-600 font-semibold text-sm text-center"
+      >Kelola Menu</a
+    >
+    <button
+      class="flex-1 py-2.5 bg-brand-600 text-white font-semibold rounded-xl text-sm"
+    >
+      Kelola Order
+    </button>
   </div>
 
   <!-- Header section -->
   <div class="flex items-start justify-between mb-4">
     <div>
       <h1 class="font-bold text-gray-900">Pesanan Aktif</h1>
-      <p class="text-xs text-gray-500">Monitor status pesanan real-time pelanggan Anda.</p>
+      <p class="text-xs text-gray-500">
+        Monitor status pesanan real-time pelanggan Anda.
+      </p>
     </div>
-    <span class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl text-xs font-bold">
+    <span
+      class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl text-xs font-bold"
+    >
       {{ active_orders | length }} Menunggu
     </span>
   </div>
-
-  <!-- Walk-in Quick -->
-  <a href="{{ url_for('admin.walkin_order') }}"
-     class="flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold py-3 rounded-2xl shadow-soft mb-5">
-    <i data-lucide="plus-circle" class="w-5 h-5"></i>
-    Buat Order Walk-in
-  </a>
 
   <!-- Active Orders -->
   <div class="space-y-3 mb-6">
     {% for order in active_orders %}
     <div class="bg-white rounded-2xl p-4 shadow-soft">
       <div class="flex items-start gap-3 mb-3">
-        <div class="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold">
+        <div
+          class="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold"
+        >
           #{{ order.id }}
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <p class="font-bold text-gray-900">{{ order.customer_name or 'Walk-in' }}</p>
+            <p class="font-bold text-gray-900">
+              {{ order.customer_name or 'Walk-in' }}
+            </p>
             {% if order.order_source == 'WALKIN' %}
-              <span class="text-[9px] bg-purple-100 text-purple-700 font-bold px-1.5 py-0.5 rounded">WALK-IN</span>
+            <span
+              class="text-[9px] bg-purple-100 text-purple-700 font-bold px-1.5 py-0.5 rounded"
+              >WALK-IN</span
+            >
             {% else %}
-              <span class="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded">ONLINE</span>
+            <span
+              class="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded"
+              >ONLINE</span
+            >
             {% endif %}
           </div>
           <p class="text-xs text-gray-500">
-            {{ order.created_at | to_wib if order.created_at else '' }} •
-            {{ order.payment_method }} • {{ order.order_type | upper }}
+            {{ order.created_at | to_wib if order.created_at else '' }} • {{
+            order.payment_method }} • {{ order.order_type | upper }}
           </p>
         </div>
         {% set color = order.status | status_color %}
-        <span class="bg-{{ color }}-100 text-{{ color }}-700 text-[10px] font-bold uppercase px-2 py-1 rounded">
+        <span
+          class="bg-{{ color }}-100 text-{{ color }}-700 text-[10px] font-bold uppercase px-2 py-1 rounded"
+        >
           {{ order.status }}
         </span>
       </div>
 
       <div class="mb-3 space-y-1">
         {% for item in order.items %}
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-700">{{ item.quantity }}x {{ item.menu.name if item.menu else '-' }}</span>
-            <span class="font-semibold text-gray-900">{{ item.subtotal | rupiah }}</span>
-          </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-700"
+            >{{ item.quantity }}x {{ item.menu.name if item.menu else '-'
+            }}</span
+          >
+          <span class="font-semibold text-gray-900"
+            >{{ item.subtotal | rupiah }}</span
+          >
+        </div>
         {% endfor %}
-        <div class="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-100">
+        <div
+          class="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-100"
+        >
           <span>Total</span>
           <span>{{ order.total | rupiah }}</span>
         </div>
@@ -72,33 +92,56 @@
 
       <div class="flex gap-2">
         {% if order.status == 'menunggu' %}
-          <form method="POST" action="{{ url_for('admin.process_order', order_id=order.id) }}" class="flex-1">
-            <button type="submit"
-                    class="w-full bg-gray-900 text-white font-bold py-2.5 rounded-xl text-sm">
-              Proses
-            </button>
-          </form>
+        <form
+          method="POST"
+          action="{{ url_for('admin.process_order', order_id=order.id) }}"
+          class="flex-1"
+        >
+          <button
+            type="submit"
+            class="w-full bg-gray-900 text-white font-bold py-2.5 rounded-xl text-sm"
+          >
+            Proses
+          </button>
+        </form>
         {% elif order.status == 'memasak' %}
-          <form method="POST" action="{{ url_for('admin.ready_order', order_id=order.id) }}" class="flex-1">
-            <button type="submit"
-                    class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl text-sm">
-              Siap Diambil
-            </button>
-          </form>
+        <form
+          method="POST"
+          action="{{ url_for('admin.ready_order', order_id=order.id) }}"
+          class="flex-1"
+        >
+          <button
+            type="submit"
+            class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl text-sm"
+          >
+            Siap Diambil
+          </button>
+        </form>
         {% elif order.status == 'siap' %}
-          <form method="POST" action="{{ url_for('admin.complete_order', order_id=order.id) }}" class="flex-1">
-            <button type="submit"
-                    class="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm">
-              Selesaikan
-            </button>
-          </form>
+        <form
+          method="POST"
+          action="{{ url_for('admin.complete_order', order_id=order.id) }}"
+          class="flex-1"
+        >
+          <button
+            type="submit"
+            class="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm"
+          >
+            Selesaikan
+          </button>
+        </form>
         {% endif %}
 
-        <form method="POST" action="{{ url_for('admin.cancel_order', order_id=order.id) }}">
-          <button type="submit"
-                  class="px-3 py-2.5 bg-gray-100 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                  title="Batalkan"
-                  onclick="return confirm('Yakin batalkan order ini?')">
+        <form
+          method="POST"
+          action="{{ url_for('admin.cancel_order', order_id=order.id) }}"
+        >
+          <button
+            type="submit"
+            class="px-3 py-2.5 bg-gray-100 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+            title="Batalkan"
+            onclick="return confirm('Yakin batalkan order ini?');"
+          >
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </form>
@@ -111,36 +154,5 @@
     </div>
     {% endfor %}
   </div>
-
-  <!-- Recent Orders (history) -->
-  <h2 class="text-base font-bold text-gray-900 mb-3">Riwayat Terbaru</h2>
-  <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-    {% for order in recent_orders[:10] %}
-    <div class="flex items-center gap-3 p-3 border-b border-gray-100 last:border-0">
-      <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-xs text-gray-700">
-        #{{ order.id }}
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-semibold text-gray-900 truncate">{{ order.customer_name or 'Walk-in' }}</p>
-        <p class="text-xs text-gray-500">{{ order.order_code }}</p>
-      </div>
-      {% set color = order.status | status_color %}
-      <div class="flex items-center gap-3">
-        <div class="text-right">
-          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-{{ color }}-100 text-{{ color }}-700">{{ order.status }}</span>
-          <p class="text-xs font-bold text-gray-900 mt-1">{{ order.total | rupiah }}</p>
-        </div>
-        {% if order.status == 'selesai' %}
-        <a href="{{ url_for('admin.print_receipt', order_id=order.id) }}" target="_blank"
-           class="text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-xl transition-colors"
-           title="Cetak Nota">
-          <i data-lucide="printer" class="w-4 h-4"></i>
-        </a>
-        {% endif %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
 </div>
 {% endblock %}
