@@ -1,16 +1,9 @@
-{% extends "base.html" %}
-{% set active_nav = 'menu' %}
-{% block title %}Menu · Dapur Hijrah{% endblock %}
-
-{% block header %}
-  {% include 'customer/_header.html' %}
-{% endblock %}
-
-{% block content %}
-{# Gambar fallback es teler (open source, Wikimedia Commons) bila menu belum punya foto #}
-{% set fallback_img = 'https://commons.wikimedia.org/wiki/Special:FilePath/Es_teler.jpg?width=400' %}
+{% extends "base.html" %} {% set active_nav = 'menu' %} {% block title %}Menu ·
+Dapur Hijrah{% endblock %} {% block header %} {% include 'customer/_header.html'
+%} {% endblock %} {% block content %} {# Gambar fallback es teler (open source,
+Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
+'https://commons.wikimedia.org/wiki/Special:FilePath/Es_teler.jpg?width=400' %}
 <style>
-
   .dt-option {
     width: 100%;
     display: flex;
@@ -24,25 +17,52 @@
     transition: all 0.15s;
     cursor: pointer;
   }
-  .dt-option:hover, .dt-option:active {
+  .dt-option:hover,
+  .dt-option:active {
     border-color: #f59e0b;
     background: #fffbeb;
     transform: scale(0.98);
   }
-  .dt-emoji { font-size: 22px; flex-shrink: 0; }
-  .dt-label { font-size: 14px; font-weight: 600; color: #111827; }
-  .dt-step { animation: dtSlideIn 0.25s ease; }
-  .hidden { display: none !important; }
+  .dt-emoji {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .dt-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+  .dt-step {
+    animation: dtSlideIn 0.25s ease;
+  }
+  .hidden {
+    display: none !important;
+  }
   @keyframes dtSlideIn {
-    from { opacity: 0; transform: translateX(16px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   /* ===== Toggle tampilan Grid / List ===== */
-  .view-toggle-btn { transition: background .15s; cursor: pointer; }
-  .view-toggle-btn svg { color: #9ca3af; }          /* gray-400 (tidak aktif) */
-  .view-toggle-btn.active { background: #f3f4f6; }   /* gray-100 */
-  .view-toggle-btn.active svg { color: #374151; }    /* gray-700 (aktif) */
+  .view-toggle-btn {
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .view-toggle-btn svg {
+    color: #9ca3af;
+  } /* gray-400 (tidak aktif) */
+  .view-toggle-btn.active {
+    background: #f3f4f6;
+  } /* gray-100 */
+  .view-toggle-btn.active svg {
+    color: #374151;
+  } /* gray-700 (aktif) */
 
   /* ===== Layout List View ===== */
   #menu-container.view-list {
@@ -71,19 +91,39 @@
     flex-direction: column;
     justify-content: center;
   }
-  #menu-container.view-list .menu-empty { width: 100%; }
-
+  #menu-container.view-list .menu-empty {
+    width: 100%;
+  }
 </style>
 <div class="px-4 pt-4">
+  <!-- Hint kecil di atas icon Bantu Pilih Menu -->
+  <div class="flex justify-end items-center gap-1 mb-1 pr-1 text-amber-600">
+    <span class="text-[10px] font-semibold">Bantu pilih menu</span>
+    <i data-lucide="arrow-down" class="w-3 h-3"></i>
+  </div>
 
   <!-- Search Bar -->
   <form method="GET" class="relative mb-5">
-    <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-    <input type="text" name="q" value="{{ keyword }}" placeholder="Cari menu favoritmu..."
-           class="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border border-gray-200 text-sm shadow-soft focus:outline-none focus:ring-2 focus:ring-brand-500">
-    <button type="button" onclick="event.preventDefault(); openDecisionTree()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-amber-400 hover:bg-amber-500 rounded-xl flex items-center justify-center transition active:scale-95"
-            title="Bantu pilih menu">
+    <i
+      data-lucide="search"
+      class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+    ></i>
+    <input
+      type="text"
+      name="q"
+      value="{{ keyword }}"
+      placeholder="Cari menu favoritmu..."
+      class="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border border-gray-200 text-sm shadow-soft focus:outline-none focus:ring-2 focus:ring-brand-500"
+    />
+    <button
+      type="button"
+      onclick="
+        event.preventDefault();
+        openDecisionTree();
+      "
+      class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-amber-400 hover:bg-amber-500 rounded-xl flex items-center justify-center transition active:scale-95"
+      title="Bantu pilih menu"
+    >
       <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
     </button>
   </form>
@@ -93,44 +133,63 @@
   <div class="mb-5">
     <div class="flex items-center gap-2 mb-3">
       <h2 class="font-bold text-gray-900">Recommended for you</h2>
-      <div class="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center">
+      <div
+        class="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center"
+      >
         <i data-lucide="star" class="w-3 h-3 text-white fill-white"></i>
       </div>
     </div>
 
     <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-2">
-      {% for r in recommendations %}
-        {% set m = r.menu %}
-        {% if m %}
-        <div class="bg-white rounded-2xl overflow-hidden shadow-soft w-56 flex-shrink-0">
-          <div class="relative">
-            <img src="{{ m.image_url or fallback_img }}"
-                 alt="{{ m.name }}" class="w-full h-36 object-cover"
-                 onerror="this.onerror=null;this.src='{{ fallback_img }}';">
-            <div class="absolute top-2 left-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg flex items-center gap-1">
-              <i data-lucide="zap" class="w-3 h-3 text-amber-500 fill-amber-500"></i>
-              <span class="text-xs font-bold text-gray-900">{{ (r.match_score * 100) | int }}% Match</span>
-            </div>
-          </div>
-          <div class="p-3">
-            <div class="flex items-baseline justify-between mb-1">
-              <p class="font-bold text-gray-900 text-sm truncate flex-1">{{ m.name }}</p>
-              <span class="text-brand-600 font-bold text-sm">{{ m.price | rupiah }}</span>
-            </div>
-            <p class="text-xs text-gray-500 mb-3 line-clamp-1">{{ m.description or '-' }}</p>
-            <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
-              <input type="hidden" name="menu_id" value="{{ m.id }}">
-              <input type="hidden" name="quantity" value="1">
-              <button type="submit"
-                      class="w-full bg-brand-600 text-white font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5">
-                <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
-                Tambah ke Keranjang
-              </button>
-            </form>
+      {% for r in recommendations %} {% set m = r.menu %} {% if m %}
+      <div
+        class="bg-white rounded-2xl overflow-hidden shadow-soft w-56 flex-shrink-0"
+      >
+        <div class="relative">
+          <img
+            src="{{ m.image_url or fallback_img }}"
+            alt="{{ m.name }}"
+            class="w-full h-36 object-cover"
+            onerror="this.onerror=null;this.src='{{ fallback_img }}';"
+          />
+          <div
+            class="absolute top-2 left-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg flex items-center gap-1"
+          >
+            <i
+              data-lucide="zap"
+              class="w-3 h-3 text-amber-500 fill-amber-500"
+            ></i>
+            <span class="text-xs font-bold text-gray-900"
+              >{{ (r.match_score * 100) | int }}% Match</span
+            >
           </div>
         </div>
-        {% endif %}
-      {% endfor %}
+        <div class="p-3">
+          <div class="flex items-baseline justify-between mb-1">
+            <p class="font-bold text-gray-900 text-sm truncate flex-1">
+              {{ m.name }}
+            </p>
+            <span class="text-brand-600 font-bold text-sm"
+              >{{ m.price | rupiah }}</span
+            >
+          </div>
+          <p class="text-xs text-gray-500 mb-3 line-clamp-1">
+            {{ m.description or '-' }}
+          </p>
+          <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
+            <input type="hidden" name="menu_id" value="{{ m.id }}" />
+            <input type="hidden" name="quantity" value="1" />
+            <button
+              type="submit"
+              class="w-full bg-brand-600 text-white font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5"
+            >
+              <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+              Tambah ke Keranjang
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %} {% endfor %}
     </div>
   </div>
   {% endif %}
@@ -142,12 +201,22 @@
       <p class="text-xs text-gray-500">Temukan hidangan terbaik kami</p>
     </div>
     <div class="flex gap-1 bg-white rounded-xl p-1 shadow-soft">
-      <button id="view-grid-btn" type="button" onclick="setMenuView('grid')"
-              class="view-toggle-btn active p-1.5 rounded-lg" title="Tampilan grid">
+      <button
+        id="view-grid-btn"
+        type="button"
+        onclick="setMenuView('grid')"
+        class="view-toggle-btn active p-1.5 rounded-lg"
+        title="Tampilan grid"
+      >
         <i data-lucide="grid-2x2" class="w-4 h-4"></i>
       </button>
-      <button id="view-list-btn" type="button" onclick="setMenuView('list')"
-              class="view-toggle-btn p-1.5 rounded-lg" title="Tampilan list">
+      <button
+        id="view-list-btn"
+        type="button"
+        onclick="setMenuView('list')"
+        class="view-toggle-btn p-1.5 rounded-lg"
+        title="Tampilan list"
+      >
         <i data-lucide="list" class="w-4 h-4"></i>
       </button>
     </div>
@@ -158,27 +227,46 @@
     {% for menu in menus %}
     <div class="menu-card bg-white rounded-2xl overflow-hidden shadow-soft">
       <div class="menu-img-wrap relative">
-        <img src="{{ menu.image_url or fallback_img }}"
-             alt="{{ menu.name }}" class="w-full h-32 object-cover"
-             onerror="this.onerror=null;this.src='{{ fallback_img }}';">
+        <img
+          src="{{ menu.image_url or fallback_img }}"
+          alt="{{ menu.name }}"
+          class="w-full h-32 object-cover"
+          onerror="this.onerror=null;this.src='{{ fallback_img }}';"
+        />
         {% if menu.is_best_seller %}
-          <span class="absolute top-2 left-2 bg-brand-500 text-white text-[9px] font-bold px-2 py-0.5 rounded">BEST SELLER</span>
+        <span
+          class="absolute top-2 left-2 bg-brand-500 text-white text-[9px] font-bold px-2 py-0.5 rounded"
+          >BEST SELLER</span
+        >
         {% elif menu.is_favorite %}
-          <span class="absolute top-2 left-2 bg-amber-400 text-white text-[9px] font-bold px-2 py-0.5 rounded">FAVORITE</span>
+        <span
+          class="absolute top-2 left-2 bg-amber-400 text-white text-[9px] font-bold px-2 py-0.5 rounded"
+          >FAVORITE</span
+        >
         {% endif %}
       </div>
       <div class="menu-body p-3">
-        <p class="font-bold text-gray-900 text-sm truncate mb-1">{{ menu.name }}</p>
+        <p class="font-bold text-gray-900 text-sm truncate mb-1">
+          {{ menu.name }}
+        </p>
         <div class="flex items-center gap-1 mb-2">
-          <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+          <i
+            data-lucide="star"
+            class="w-3 h-3 fill-amber-400 text-amber-400"
+          ></i>
           <span class="text-xs text-gray-600">{{ menu.rating }}</span>
         </div>
         <div class="flex items-center justify-between mt-auto">
-          <span class="font-bold text-gray-900 text-sm">{{ menu.price | rupiah }}</span>
+          <span class="font-bold text-gray-900 text-sm"
+            >{{ menu.price | rupiah }}</span
+          >
           <form method="POST" action="{{ url_for('customer.add_to_cart') }}">
-            <input type="hidden" name="menu_id" value="{{ menu.id }}">
-            <input type="hidden" name="quantity" value="1">
-            <button type="submit" class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center active:scale-95 transition">
+            <input type="hidden" name="menu_id" value="{{ menu.id }}" />
+            <input type="hidden" name="quantity" value="1" />
+            <button
+              type="submit"
+              class="w-7 h-7 bg-gray-900 rounded-full flex items-center justify-center active:scale-95 transition"
+            >
               <i data-lucide="plus" class="w-3.5 h-3.5 text-white"></i>
             </button>
           </form>
@@ -195,27 +283,32 @@
 
   <!-- Floating Cart Button -->
   {% if cart_count > 0 %}
-  <a href="{{ url_for('customer.cart_view') }}"
-     class="fixed bottom-20 right-4 w-14 h-14 bg-amber-400 rounded-full shadow-lg flex items-center justify-center z-20">
+  <a
+    href="{{ url_for('customer.cart_view') }}"
+    class="fixed bottom-36 right-4 w-14 h-14 bg-amber-400 rounded-full shadow-lg flex items-center justify-center z-20"
+  >
     <i data-lucide="shopping-basket" class="w-6 h-6 text-gray-900"></i>
-    <span class="absolute -top-1 -right-1 bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+    <span
+      class="absolute -top-1 -right-1 bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center"
+    >
       {{ cart_count }}
     </span>
   </a>
   {% endif %}
-
 </div>
-<div id="dt-modal"
-     class="fixed inset-0 z-50 flex items-end justify-center hidden"
-     onclick="if(event.target===this) closeDecisionTree()">
-
+<div
+  id="dt-modal"
+  class="fixed inset-0 z-50 flex items-end justify-center hidden"
+  onclick="if (event.target === this) closeDecisionTree();"
+>
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
   <!-- Sheet -->
-  <div class="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
-       style="max-height: 90dvh; display:flex; flex-direction:column;">
-
+  <div
+    class="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
+    style="max-height: 90dvh; display: flex; flex-direction: column"
+  >
     <!-- Handle -->
     <div class="flex justify-center pt-3 pb-1 flex-shrink-0">
       <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
@@ -224,15 +317,22 @@
     <!-- Header -->
     <div class="px-5 pb-3 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-amber-400 rounded-xl flex items-center justify-center">
+        <div
+          class="w-8 h-8 bg-amber-400 rounded-xl flex items-center justify-center"
+        >
           <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
         </div>
         <div>
-          <p class="font-bold text-gray-900 text-sm leading-tight">Bantu Pilih Menu</p>
+          <p class="font-bold text-gray-900 text-sm leading-tight">
+            Bantu Pilih Menu
+          </p>
           <p class="text-[10px] text-gray-400">Jawab 2–3 pertanyaan singkat</p>
         </div>
       </div>
-      <button onclick="closeDecisionTree()" class="p-1.5 rounded-xl hover:bg-gray-100">
+      <button
+        onclick="closeDecisionTree()"
+        class="p-1.5 rounded-xl hover:bg-gray-100"
+      >
         <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
       </button>
     </div>
@@ -240,139 +340,206 @@
     <!-- Progress bar -->
     <div class="px-5 mb-3 flex-shrink-0">
       <div class="w-full h-1.5 bg-gray-100 rounded-full">
-        <div id="dt-progress" class="h-1.5 bg-amber-400 rounded-full transition-all duration-500" style="width:0%"></div>
+        <div
+          id="dt-progress"
+          class="h-1.5 bg-amber-400 rounded-full transition-all duration-500"
+          style="width: 0%"
+        ></div>
       </div>
     </div>
 
     <!-- Content area (scrollable) -->
     <div class="overflow-y-auto flex-1 px-5 pb-6">
-
       <!-- Step 1: Topping -->
       <div id="dt-step-1" class="dt-step">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pertanyaan 1 dari 3</p>
-        <h3 class="font-bold text-gray-900 text-base mb-4">Topping favorit kamu apa?</h3>
+        <p
+          class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1"
+        >
+          Pertanyaan 1 dari 3
+        </p>
+        <h3 class="font-bold text-gray-900 text-base mb-4">
+          Topping favorit kamu apa?
+        </h3>
         <div class="space-y-2.5">
-          <button class="dt-option" onclick="dtChoose(1,'buah')">
+          <button class="dt-option" onclick="dtChoose(1, 'buah')">
             <span class="dt-emoji">🍈</span>
             <span class="dt-label">Buah-buahan segar</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
-          <button class="dt-option" onclick="dtChoose(1,'eskrim')">
+          <button class="dt-option" onclick="dtChoose(1, 'eskrim')">
             <span class="dt-emoji">🍦</span>
             <span class="dt-label">Es Krim</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
-          <button class="dt-option" onclick="dtChoose(1,'keju')">
+          <button class="dt-option" onclick="dtChoose(1, 'keju')">
             <span class="dt-emoji">🧀</span>
             <span class="dt-label">Keju</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
-          <button class="dt-option" onclick="dtChoose(1,'durian')">
+          <button class="dt-option" onclick="dtChoose(1, 'durian')">
             <span class="dt-emoji">🌟</span>
             <span class="dt-label">Durian</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
         </div>
       </div>
 
       <!-- Step 2: Ori atau Spesial (hanya muncul jika pilih buah) -->
       <div id="dt-step-2" class="dt-step hidden">
-        <button onclick="dtBack(2)" class="flex items-center gap-1 text-xs text-gray-400 mb-3 hover:text-gray-600">
+        <button
+          onclick="dtBack(2)"
+          class="flex items-center gap-1 text-xs text-gray-400 mb-3 hover:text-gray-600"
+        >
           <i data-lucide="arrow-left" class="w-3 h-3"></i> Kembali
         </button>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pertanyaan 2 dari 3</p>
-        <h3 class="font-bold text-gray-900 text-base mb-4">Mau yang biasa atau spesial?</h3>
+        <p
+          class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1"
+        >
+          Pertanyaan 2 dari 3
+        </p>
+        <h3 class="font-bold text-gray-900 text-base mb-4">
+          Mau yang biasa atau spesial?
+        </h3>
         <div class="space-y-2.5">
-          <button class="dt-option" onclick="dtChoose(2,'ori')">
+          <button class="dt-option" onclick="dtChoose(2, 'ori')">
             <span class="dt-emoji">😊</span>
             <span class="dt-label">Original saja</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
-          <button class="dt-option" onclick="dtChoose(2,'spesial')">
+          <button class="dt-option" onclick="dtChoose(2, 'spesial')">
             <span class="dt-emoji">👑</span>
             <span class="dt-label">Yang paling spesial</span>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
         </div>
       </div>
 
       <!-- Step 3: Ukuran (muncul kecuali hasil sudah special durian) -->
       <div id="dt-step-3" class="dt-step hidden">
-        <button onclick="dtBack(3)" class="flex items-center gap-1 text-xs text-gray-400 mb-3 hover:text-gray-600">
+        <button
+          onclick="dtBack(3)"
+          class="flex items-center gap-1 text-xs text-gray-400 mb-3 hover:text-gray-600"
+        >
           <i data-lucide="arrow-left" class="w-3 h-3"></i> Kembali
         </button>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pertanyaan 3 dari 3</p>
-        <h3 class="font-bold text-gray-900 text-base mb-4">Mau ukuran berapa?</h3>
+        <p
+          class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1"
+        >
+          Pertanyaan 3 dari 3
+        </p>
+        <h3 class="font-bold text-gray-900 text-base mb-4">
+          Mau ukuran berapa?
+        </h3>
         <div class="space-y-2.5">
-          <button class="dt-option" onclick="dtChoose(3,'reguler')">
+          <button class="dt-option" onclick="dtChoose(3, 'reguler')">
             <span class="dt-emoji">🥤</span>
             <div>
               <p class="dt-label">Reguler</p>
               <p class="text-[11px] text-gray-400">Harga lebih hemat</p>
             </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
-          <button class="dt-option" onclick="dtChoose(3,'jumbo')">
+          <button class="dt-option" onclick="dtChoose(3, 'jumbo')">
             <span class="dt-emoji">🧃</span>
             <div>
               <p class="dt-label">Jumbo</p>
               <p class="text-[11px] text-gray-400">Porsi lebih besar</p>
             </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"></i>
+            <i
+              data-lucide="chevron-right"
+              class="w-4 h-4 text-gray-300 ml-auto flex-shrink-0"
+            ></i>
           </button>
         </div>
       </div>
 
       <!-- Step Result -->
       <div id="dt-result" class="dt-step hidden text-center py-2">
-        <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+        <div
+          class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-3"
+        >
           <span class="text-3xl" id="result-emoji">🌟</span>
         </div>
         <p class="text-xs text-gray-400 mb-1">Rekomendasi untukmu</p>
         <h3 class="font-bold text-gray-900 text-lg mb-1" id="result-name">-</h3>
-        <p class="text-2xl font-extrabold text-brand-600 mb-4" id="result-price">-</p>
+        <p
+          class="text-2xl font-extrabold text-brand-600 mb-4"
+          id="result-price"
+        >
+          -
+        </p>
 
         <!-- Card preview -->
-        <div class="bg-gray-50 rounded-2xl p-4 mb-5 text-left flex items-center gap-3">
-          <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div
+          class="bg-gray-50 rounded-2xl p-4 mb-5 text-left flex items-center gap-3"
+        >
+          <div
+            class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0"
+          >
             <span class="text-2xl" id="result-emoji-2">🌟</span>
           </div>
           <div>
-            <p class="font-semibold text-gray-900 text-sm" id="result-name-2">-</p>
+            <p class="font-semibold text-gray-900 text-sm" id="result-name-2">
+              -
+            </p>
             <p class="text-xs text-gray-400" id="result-desc">-</p>
           </div>
         </div>
 
         <div class="space-y-2.5">
-          <button id="result-add-btn"
-                  class="w-full bg-gray-900 text-white font-semibold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition">
+          <button
+            id="result-add-btn"
+            class="w-full bg-gray-900 text-white font-semibold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition"
+          >
             <i data-lucide="shopping-cart" class="w-4 h-4"></i>
             Tambah ke Keranjang
           </button>
-          <button onclick="dtReset()"
-                  class="w-full bg-gray-100 text-gray-600 font-semibold py-3 rounded-2xl text-sm active:scale-95 transition">
+          <button
+            onclick="dtReset()"
+            class="w-full bg-gray-100 text-gray-600 font-semibold py-3 rounded-2xl text-sm active:scale-95 transition"
+          >
             Ulangi dari awal
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 <script>
   // ===== Toggle tampilan Grid / List =====
   function setMenuView(view) {
-    const container = document.getElementById('menu-container');
+    const container = document.getElementById("menu-container");
     if (!container) return;
-    const gridBtn = document.getElementById('view-grid-btn');
-    const listBtn = document.getElementById('view-list-btn');
-    const isList = view === 'list';
+    const gridBtn = document.getElementById("view-grid-btn");
+    const listBtn = document.getElementById("view-list-btn");
+    const isList = view === "list";
 
-    container.classList.toggle('view-list', isList);
-    if (gridBtn) gridBtn.classList.toggle('active', !isList);
-    if (listBtn) listBtn.classList.toggle('active', isList);
+    container.classList.toggle("view-list", isList);
+    if (gridBtn) gridBtn.classList.toggle("active", !isList);
+    if (listBtn) listBtn.classList.toggle("active", isList);
 
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (typeof lucide !== "undefined") lucide.createIcons();
   }
 
   // ===== Decision Tree =====
@@ -381,51 +548,106 @@
 
   // Data menu — sesuaikan menu_id dengan ID di database kamu
   const dtMenus = {
-    durian:         { name: 'Es Teler Special Durian', price: 'Rp22.000', rawPrice: 22000, emoji: '🌟', desc: 'Spesial dengan durian premium', menu_id: 6 },
-    eskrim_reguler: { name: 'Es Teler Ice Cream Regular', price: 'Rp17.000', rawPrice: 17000, emoji: '🍦', desc: 'Es krim lembut ukuran pas', menu_id: 9 },
-    eskrim_jumbo:   { name: 'Es Teler Ice Cream Jumbo', price: 'Rp20.000', rawPrice: 20000, emoji: '🍦', desc: 'Es krim lembut porsi besar', menu_id: 2 },
-    keju_reguler:   { name: 'Es Teler Extra Cheese Regular', price: 'Rp14.000', rawPrice: 14000, emoji: '🧀', desc: 'Gurih keju di setiap suapan', menu_id: 7 },
-    keju_jumbo:     { name: 'Es Teler Extra Cheese Jumbo', price: 'Rp17.000', rawPrice: 17000, emoji: '🧀', desc: 'Gurih keju porsi jumbo', menu_id: 10 },
-    ori_reguler:    { name: 'Es Teler Ori Regular', price: 'Rp12.000', rawPrice: 12000, emoji: '🍈', desc: 'Klasik segar, pilihan hemat', menu_id: 4 },
-    ori_jumbo:      { name: 'Es Teler Ori Jumbo', price: 'Rp15.000', rawPrice: 15000, emoji: '🍈', desc: 'Klasik segar porsi jumbo', menu_id: 8 },
+    durian: {
+      name: "Es Teler Special Durian",
+      price: "Rp22.000",
+      rawPrice: 22000,
+      emoji: "🌟",
+      desc: "Spesial dengan durian premium",
+      menu_id: 6,
+    },
+    eskrim_reguler: {
+      name: "Es Teler Ice Cream Regular",
+      price: "Rp17.000",
+      rawPrice: 17000,
+      emoji: "🍦",
+      desc: "Es krim lembut ukuran pas",
+      menu_id: 9,
+    },
+    eskrim_jumbo: {
+      name: "Es Teler Ice Cream Jumbo",
+      price: "Rp20.000",
+      rawPrice: 20000,
+      emoji: "🍦",
+      desc: "Es krim lembut porsi besar",
+      menu_id: 2,
+    },
+    keju_reguler: {
+      name: "Es Teler Extra Cheese Regular",
+      price: "Rp14.000",
+      rawPrice: 14000,
+      emoji: "🧀",
+      desc: "Gurih keju di setiap suapan",
+      menu_id: 7,
+    },
+    keju_jumbo: {
+      name: "Es Teler Extra Cheese Jumbo",
+      price: "Rp17.000",
+      rawPrice: 17000,
+      emoji: "🧀",
+      desc: "Gurih keju porsi jumbo",
+      menu_id: 10,
+    },
+    ori_reguler: {
+      name: "Es Teler Ori Regular",
+      price: "Rp12.000",
+      rawPrice: 12000,
+      emoji: "🍈",
+      desc: "Klasik segar, pilihan hemat",
+      menu_id: 4,
+    },
+    ori_jumbo: {
+      name: "Es Teler Ori Jumbo",
+      price: "Rp15.000",
+      rawPrice: 15000,
+      emoji: "🍈",
+      desc: "Klasik segar porsi jumbo",
+      menu_id: 8,
+    },
   };
 
   function openDecisionTree() {
     dtReset();
-    document.getElementById('dt-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    document.getElementById("dt-modal").classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    if (typeof lucide !== "undefined") lucide.createIcons();
   }
 
   function closeDecisionTree() {
-    document.getElementById('dt-modal').classList.add('hidden');
-    document.body.style.overflow = '';
+    document.getElementById("dt-modal").classList.add("hidden");
+    document.body.style.overflow = "";
   }
 
   function dtReset() {
-    dtState.topping = null; dtState.jenis = null; dtState.ukuran = null;
+    dtState.topping = null;
+    dtState.jenis = null;
+    dtState.ukuran = null;
     showStep(1);
     setProgress(0);
   }
 
   function showStep(n) {
-    document.querySelectorAll('.dt-step').forEach(el => el.classList.add('hidden'));
-    const el = document.getElementById('dt-step-' + n) || document.getElementById('dt-result');
-    if (el) el.classList.remove('hidden');
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    document
+      .querySelectorAll(".dt-step")
+      .forEach((el) => el.classList.add("hidden"));
+    const el =
+      document.getElementById("dt-step-" + n) ||
+      document.getElementById("dt-result");
+    if (el) el.classList.remove("hidden");
+    if (typeof lucide !== "undefined") lucide.createIcons();
   }
 
   function setProgress(pct) {
-    document.getElementById('dt-progress').style.width = pct + '%';
+    document.getElementById("dt-progress").style.width = pct + "%";
   }
 
   function dtChoose(step, value) {
     if (step === 1) {
       dtState.topping = value;
       setProgress(33);
-      if (value === 'durian') {
-        showResult('durian');
-      } else if (value === 'buah') {
+      if (value === "durian") {
+        showResult("durian");
+      } else if (value === "buah") {
         showStep(2);
       } else {
         // eskrim / keju langsung ke ukuran
@@ -434,8 +656,8 @@
     } else if (step === 2) {
       dtState.jenis = value;
       setProgress(66);
-      if (value === 'spesial') {
-        showResult('durian');
+      if (value === "spesial") {
+        showResult("durian");
       } else {
         showStep(3);
       }
@@ -446,18 +668,25 @@
       let key;
       const t = dtState.topping;
       const u = value;
-      if (t === 'eskrim') key = 'eskrim_' + u;
-      else if (t === 'keju') key = 'keju_' + u;
-      else key = 'ori_' + u; // buah ori
+      if (t === "eskrim") key = "eskrim_" + u;
+      else if (t === "keju") key = "keju_" + u;
+      else key = "ori_" + u; // buah ori
       showResult(key);
     }
   }
 
   function dtBack(currentStep) {
-    if (currentStep === 2) { showStep(1); setProgress(0); }
-    else if (currentStep === 3) {
-      if (dtState.topping === 'buah') { showStep(2); setProgress(33); }
-      else { showStep(1); setProgress(0); }
+    if (currentStep === 2) {
+      showStep(1);
+      setProgress(0);
+    } else if (currentStep === 3) {
+      if (dtState.topping === "buah") {
+        showStep(2);
+        setProgress(33);
+      } else {
+        showStep(1);
+        setProgress(0);
+      }
     }
   }
 
@@ -465,20 +694,20 @@
     const m = dtMenus[key];
     if (!m) return;
 
-    document.getElementById('result-emoji').textContent  = m.emoji;
-    document.getElementById('result-emoji-2').textContent = m.emoji;
-    document.getElementById('result-name').textContent   = m.name;
-    document.getElementById('result-name-2').textContent = m.name;
-    document.getElementById('result-price').textContent  = m.price;
-    document.getElementById('result-desc').textContent   = m.desc;
+    document.getElementById("result-emoji").textContent = m.emoji;
+    document.getElementById("result-emoji-2").textContent = m.emoji;
+    document.getElementById("result-name").textContent = m.name;
+    document.getElementById("result-name-2").textContent = m.name;
+    document.getElementById("result-price").textContent = m.price;
+    document.getElementById("result-desc").textContent = m.desc;
 
     // Setup tombol add to cart
-    const btn = document.getElementById('result-add-btn');
+    const btn = document.getElementById("result-add-btn");
     if (m.menu_id) {
       // Submit form add to cart
       btn.onclick = () => {
-        const form = document.createElement('form');
-        form.method = 'POST';
+        const form = document.createElement("form");
+        form.method = "POST";
         form.action = '{{ url_for("customer.add_to_cart") }}'; // sesuaikan dengan url_for customer.add_to_cart
         form.innerHTML = `
           <input type="hidden" name="menu_id" value="${m.menu_id}">
@@ -494,18 +723,16 @@
         const searchInput = document.querySelector('input[name="q"]');
         if (searchInput) {
           searchInput.value = m.name;
-          searchInput.closest('form').submit();
+          searchInput.closest("form").submit();
         }
       };
-      btn.innerHTML = '<i data-lucide="search" class="w-4 h-4"></i> Cari Menu Ini';
+      btn.innerHTML =
+        '<i data-lucide="search" class="w-4 h-4"></i> Cari Menu Ini';
     }
 
-    showStep('result');
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    showStep("result");
+    if (typeof lucide !== "undefined") lucide.createIcons();
   }
 </script>
-{% endblock %}
-
-{% block bottom_nav %}
-  {% include 'customer/_bottom_nav.html' %}
+{% endblock %} {% block bottom_nav %} {% include 'customer/_bottom_nav.html' %}
 {% endblock %}

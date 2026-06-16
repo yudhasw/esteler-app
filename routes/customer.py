@@ -2,15 +2,18 @@
 Routes Customer - sisi pembeli (TANPA login)
 Identifikasi pakai session_id di cookie.
 """
+import re
 import uuid
 from flask import (
-    Blueprint, request, redirect, url_for, session, render_template, flash, abort,
+    Blueprint, current_app, request, redirect, url_for, session,
+    render_template, flash, abort, jsonify,
 )
 
 from services.menu_service import MenuService
 from services.cart_service import CartService
 from services.order_service import OrderService
 from services.recommendation_service import RecommendationService
+from services.chatbot_service import ChatbotService
 
 customer_bp = Blueprint("customer", __name__)
 
@@ -96,6 +99,12 @@ def remove_from_cart(item_id):
     return redirect(url_for("customer.cart_view"))
 
 
+@customer_bp.route("/cart/summary", methods=["GET"])
+def cart_summary():
+    summary = CartService.get_summary(get_session_id())
+    return jsonify(summary)
+
+
 # ====================== PREORDER / CHECKOUT ======================
 @customer_bp.route("/preorder", methods=["GET", "POST"])
 def preorder():
@@ -130,6 +139,50 @@ def preorder():
         return redirect(url_for("customer.menu_list"))
 
     return render_template("customer/preorder.html", summary=summary)
+
+
+@customer_bp.route("/order/create", methods=["POST"])
+def create_order():
+    session_id = get_session_id()
+    data = request.get_json(silent=True) or {}
+
+    name = (data.get("name") or "").strip()
+    contact = (data.get("contact") or "").strip()
+    order_type = (data.get("order_type") or "pickup").strip()
+    payment_method = (data.get("payment_method") or "TUNAI").strip().upper()
+    note = (data.get("note") or "").strip()
+
+    if not name:
+        return jsonify({"success": False, "message": "Nama wajib diisi."}), 400
+
+    contact_digits = re.sub(r"\D", "", contact)
+    if len(contact_digits) < 8:
+        return jsonify({"success": False, "message": "Nomor kontak tidak valid (minimal 8 digit)."}), 400
+
+    if order_type not in {"pickup", "delivery", "dine-in"}:
+        order_type = "pickup"
+
+    if payment_method not in {"QRIS", "TUNAI", "COD"}:
+        payment_method = "TUNAI"
+
+    summary = CartService.get_summary(session_id)
+    if summary.get("is_empty"):
+        return jsonify({"success": False, "message": "Keranjang kosong."}), 400
+
+    try:
+        order = OrderService.create_order(session_id, {
+            "name": name,
+            "contact": contact,
+            "note": note,
+            "order_type": order_type,
+            "payment_method": payment_method,
+        })
+        if not order:
+            return jsonify({"success": False, "message": "Keranjang kosong atau tidak valid."}), 400
+        return jsonify({"success": True, "order_code": order.order_code})
+    except Exception as e:
+        current_app.logger.exception("create_order gagal")
+        return jsonify({"success": False, "message": f"Gagal membuat pesanan: {e}"}), 500
 
 
 # ====================== TRACKING ======================
@@ -176,3 +229,21 @@ def submit_rating(order_code):
         return {"success": False, "message": "Gagal menyimpan rating atau rating sudah pernah diberikan."}, 400
     except Exception as e:
         return {"success": False, "message": str(e)}, 500
+
+
+# ====================== CHATBOT ======================
+@customer_bp.route("/api/chat", methods=["POST"])
+def chat():
+    data = request.get_json(silent=True) or {}
+    message = (data.get("message") or "").strip()
+    history = data.get("history") or []
+
+    if not message:
+        return jsonify({"success": False, "message": "Pesan tidak boleh kosong."}), 400
+
+    # Batasi panjang history yang dikirim ke LLM (kontrol token usage)
+    history = history[-10:]
+    history.append({"role": "user", "content": message})
+
+    result = ChatbotService.chat(get_session_id(), history)
+    return jsonify(result)

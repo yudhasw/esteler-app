@@ -47,7 +47,7 @@
             {% endif %}
           </div>
           <p class="text-xs text-gray-500">
-            {{ order.created_at.strftime('%H:%M') if order.created_at else '' }} •
+            {{ order.created_at | to_wib if order.created_at else '' }} •
             {{ order.payment_method }} • {{ order.order_type | upper }}
           </p>
         </div>

@@ -6,8 +6,20 @@ PERUBAHAN dari versi lama:
 - get_best_sellers: pakai sold_count ranking (bukan flag manual saja)
 - Query dioptimasi (limit, ordering yang konsisten)
 """
+import re
 from typing import List, Optional
 from models import db, Menu
+
+
+# Kata-kata yang sering ikut terbawa saat LLM mengirim frasa mentah
+# pelanggan sebagai keyword (misal "pesan 2 es teler ori") - dibuang
+# supaya pencarian tetap match ke nama menu ("Es Teler Ori Regular").
+_SEARCH_STOPWORDS = {
+    "pesan", "pesanan", "mau", "ingin", "beli", "tolong", "dong", "ya",
+    "saya", "aku", "minta", "order", "buat", "untuk", "satu", "dua",
+    "tiga", "empat", "lima", "porsi", "pcs", "buah", "biji", "es",
+    "teler",
+}
 
 
 class MenuService:
@@ -32,14 +44,38 @@ class MenuService:
 
     @staticmethod
     def search(keyword: str, active_only: bool = True) -> List[Menu]:
-        """Cari menu berdasarkan kata kunci (nama atau deskripsi)."""
-        pattern = f"%{keyword}%"
-        query = Menu.query.filter(
-            db.or_(Menu.name.ilike(pattern), Menu.description.ilike(pattern))
-        )
+        """Cari menu berdasarkan kata kunci (nama atau deskripsi).
+
+        Keyword dibersihkan dulu (hapus angka & kata filler seperti "pesan",
+        "mau") dan dipecah per kata, lalu di-AND-kan - supaya frasa mentah
+        seperti "pesan 2 es teler ori" tetap match ke "Es Teler Ori Regular".
+        Kalau hasil AND kosong, fallback ke pencarian substring keyword asli.
+        """
+        raw = (keyword or "").strip()
+        cleaned = re.sub(r"\d+", " ", raw.lower())
+        terms = [w for w in cleaned.split() if w not in _SEARCH_STOPWORDS]
+        if not terms:
+            terms = [raw] if raw else []
+
+        query = Menu.query
+        for term in terms:
+            pattern = f"%{term}%"
+            query = query.filter(
+                db.or_(Menu.name.ilike(pattern), Menu.description.ilike(pattern))
+            )
         if active_only:
             query = query.filter_by(is_active=True)
-        return query.all()
+        results = query.all()
+        if results or not raw:
+            return results
+
+        # Fallback: AND per-term tidak menemukan apapun, coba substring penuh.
+        fallback_query = Menu.query.filter(
+            db.or_(Menu.name.ilike(f"%{raw}%"), Menu.description.ilike(f"%{raw}%"))
+        )
+        if active_only:
+            fallback_query = fallback_query.filter_by(is_active=True)
+        return fallback_query.all()
 
     @staticmethod
     def get_best_sellers(limit: int = 5) -> List[Menu]:
