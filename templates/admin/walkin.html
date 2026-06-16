@@ -26,7 +26,7 @@
     <div class="bg-white rounded-2xl p-5 shadow-soft">
       <h3 class="font-bold text-gray-900 mb-3">Metode Pembayaran</h3>
       <div class="grid grid-cols-3 gap-2">
-        {% for pay in [('TUNAI', 'banknote'), ('QRIS', 'qr-code'), ('COD', 'truck')] %}
+        {% for pay in [('TUNAI', 'banknote')] %}
           <label class="cursor-pointer">
             <input type="radio" name="payment_method" value="{{ pay[0] }}" {% if pay[0] == 'TUNAI' %}checked{% endif %} class="peer sr-only">
             <div class="flex flex-col items-center gap-1 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-brand-500 peer-checked:bg-brand-50">
