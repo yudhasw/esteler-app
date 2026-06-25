@@ -94,8 +94,17 @@ Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
   #menu-container.view-list .menu-empty {
     width: 100%;
   }
+
+  @media (min-width: 1024px) {
+    #menu-container.view-list {
+      gap: 16px;
+    }
+    .dt-option {
+      padding: 14px 16px;
+    }
+  }
 </style>
-<div class="px-4 pt-4">
+<div class="px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
   <!-- Hint kecil di atas icon Bantu Pilih Menu -->
   <div class="flex justify-end items-center gap-1 mb-1 pr-1 text-amber-600">
     <span class="text-[10px] font-semibold">Bantu pilih menu</span>
@@ -140,7 +149,7 @@ Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
       </div>
     </div>
 
-    <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-2">
+    <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 xl:px-12 pb-2">
       {% for r in recommendations %} {% set m = r.menu %} {% if m %}
       <div
         class="bg-white rounded-2xl overflow-hidden shadow-soft w-56 flex-shrink-0"
@@ -223,7 +232,7 @@ Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
   </div>
 
   <!-- Menu Grid / List -->
-  <div id="menu-container" class="grid grid-cols-2 gap-3">
+  <div id="menu-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
     {% for menu in menus %}
     <div class="menu-card bg-white rounded-2xl overflow-hidden shadow-soft">
       <div class="menu-img-wrap relative">
@@ -274,7 +283,7 @@ Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
       </div>
     </div>
     {% else %}
-    <div class="menu-empty col-span-2 text-center py-12 text-gray-400">
+    <div class="menu-empty col-span-full text-center py-12 text-gray-400">
       <i data-lucide="utensils-crossed" class="w-12 h-12 mx-auto mb-2"></i>
       <p>Belum ada menu</p>
     </div>
@@ -306,7 +315,7 @@ Wikimedia Commons) bila menu belum punya foto #} {% set fallback_img =
 
   <!-- Sheet -->
   <div
-    class="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
+    class="relative w-full max-w-md md:max-w-lg bg-white rounded-t-3xl shadow-2xl overflow-hidden"
     style="max-height: 90dvh; display: flex; flex-direction: column"
   >
     <!-- Handle -->

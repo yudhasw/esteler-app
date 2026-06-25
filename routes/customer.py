@@ -209,7 +209,7 @@ def track_status(code):
 def payment(order_code):
     """Halaman bayar sekarang - arahkan customer ke WhatsApp admin."""
     session_id = get_session_id()
-    order = OrderService.get_order_by_code(order_code)
+    order = OrderService.get_by_code(order_code)
 
     # Validasi: order harus ada, dan session harus cocok
     # (simpan session_id di order saat checkout, atau skip validasi jika tidak ada field-nya)

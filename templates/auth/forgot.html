@@ -3,7 +3,8 @@
 {% block container_padding %}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex flex-col px-4 py-6">
+<div class="min-h-screen flex flex-col justify-center px-4 py-6">
+<div class="w-full max-w-sm mx-auto">
   <a href="{{ url_for('auth.login') }}" class="flex items-center gap-2 text-sm text-gray-600 mb-6">
     <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Login
   </a>
@@ -25,5 +26,6 @@
       Fitur dalam pengembangan. Hubungi admin jika perlu reset.
     </p>
   </div>
+</div>
 </div>
 {% endblock %}

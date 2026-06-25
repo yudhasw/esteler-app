@@ -42,25 +42,25 @@
 {% endblock %} {% block bottom_nav %} {% set active = active_nav |
 default('home') %}
 <nav class="fixed bottom-0 left-0 right-0 z-30">
-  <div class="max-w-md mx-auto bg-white border-t border-gray-200 px-4 py-2">
-    <div class="flex justify-around items-center">
+  <div class="max-w-md md:max-w-none mx-auto bg-white border-t border-gray-200 px-4 sm:px-8 lg:px-16 py-2">
+    <div class="flex justify-around sm:justify-center items-center gap-2 sm:gap-6">
       <a
         href="{{ url_for('admin.dashboard') }}"
-        class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl {% if active == 'home' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
+        class="flex flex-col items-center gap-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl {% if active == 'home' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
       >
         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
         <span class="text-xs font-semibold">Home</span>
       </a>
       <a
         href="{{ url_for('admin.menu_management') }}"
-        class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl {% if active == 'menu' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
+        class="flex flex-col items-center gap-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl {% if active == 'menu' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
       >
         <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
         <span class="text-xs font-semibold">Menu</span>
       </a>
       <a
         href="{{ url_for('admin.order_list') }}"
-        class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl {% if active == 'orders' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
+        class="flex flex-col items-center gap-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl {% if active == 'orders' %}bg-brand-100 text-brand-700{% else %}text-gray-500{% endif %}"
       >
         <i data-lucide="receipt" class="w-5 h-5"></i>
         <span class="text-xs font-semibold">Orders</span>

@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="px-4 pt-4">
+<div class="px-4 sm:px-6 lg:px-8 xl:px-12 pt-4 lg:max-w-2xl lg:mx-auto">
 
   <h1 class="text-2xl font-bold text-gray-900 mb-1">Pesan & Lacak</h1>
   <p class="text-sm text-gray-500 mb-5">Atur pengambilan makananmu atau pantau pesanan yang sedang berjalan.</p>
@@ -15,7 +15,7 @@
   <!-- Order Summary -->
   <div class="bg-white rounded-2xl p-4 shadow-soft mb-4">
     <h3 class="font-bold text-gray-900 mb-3">Ringkasan Pesanan ({{ summary.total_items }} item)</h3>
-    <div class="space-y-1 text-sm mb-3">
+    <div class="space-y-1.5 text-sm mb-3">
       {% for item in summary['items'] %}
         <div class="flex justify-between text-gray-700">
           <span>{{ item.quantity }}x {{ item.name }}</span>
@@ -36,16 +36,18 @@
       <h3 class="font-bold text-gray-900">Form Pesan</h3>
     </div>
 
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pemesan *</label>
-      <input type="text" name="customer_name" required placeholder="Masukkan nama lengkap"
-             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pemesan *</label>
+        <input type="text" name="customer_name" required placeholder="Masukkan nama lengkap"
+               class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
 
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-2">No HP / WhatsApp *</label>
-      <input type="tel" name="customer_contact" required placeholder="08xxxxxxxxxx"
-             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">No HP / WhatsApp *</label>
+        <input type="tel" name="customer_contact" required placeholder="08xxxxxxxxxx"
+               class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
     </div>
 
     <div>
@@ -56,7 +58,7 @@
 
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran *</label>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
         {% for pay in [('TUNAI', 'banknote'), ('QRIS', 'qr-code')] %}
           <label class="cursor-pointer">
             <input type="radio" name="payment_method" value="{{ pay[0] }}" {% if pay[0] == 'TUNAI' %}checked{% endif %} class="peer sr-only">

@@ -15,7 +15,7 @@ draft card dihapus, diganti checkout panel yang muncul otomatis #}
   <div id="chatbot-backdrop" class="absolute inset-0 bg-black/30"></div>
 
   <div
-    class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-card h-[85vh] flex flex-col overflow-hidden"
+    class="absolute bottom-0 left-0 right-0 max-w-md md:max-w-lg mx-auto bg-white rounded-t-3xl shadow-card h-[85vh] flex flex-col overflow-hidden"
   >
     <div
       class="flex items-center justify-between px-4 py-3 bg-brand-600 text-white flex-shrink-0"
@@ -46,19 +46,19 @@ draft card dihapus, diganti checkout panel yang muncul otomatis #}
 
     <div
       id="chatbot-messages"
-      class="flex-1 overflow-y-auto px-4 py-3 space-y-3 hide-scrollbar bg-cream"
+      class="flex-1 overflow-y-auto px-4 py-3 space-y-3 sm:space-y-4 hide-scrollbar bg-cream"
     ></div>
 
     <form
       id="chatbot-form"
-      class="flex items-center gap-2 border-t border-gray-200 bg-white px-3 py-2 flex-shrink-0"
+      class="flex items-center gap-2 border-t border-gray-200 bg-white px-3 py-2.5 flex-shrink-0"
     >
       <input
         id="chatbot-input"
         type="text"
         autocomplete="off"
         placeholder="Tulis pesan..."
-        class="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+        class="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
       />
       <button
         type="submit"
@@ -76,7 +76,7 @@ draft card dihapus, diganti checkout panel yang muncul otomatis #}
   <div id="checkout-backdrop" class="absolute inset-0 bg-black/50"></div>
 
   <div
-    class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-card max-h-[90vh] flex flex-col overflow-hidden"
+    class="absolute bottom-0 left-0 right-0 max-w-md md:max-w-lg mx-auto bg-white rounded-t-3xl shadow-card max-h-[90vh] flex flex-col overflow-hidden"
   >
     <div
       class="flex items-center justify-between px-4 py-3 bg-brand-600 text-white flex-shrink-0"

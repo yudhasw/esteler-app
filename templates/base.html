@@ -60,8 +60,8 @@
 </head>
 <body class="min-h-screen text-gray-800 antialiased">
 
-  <!-- Container mobile-first (max 480px), centered di desktop -->
-  <div class="max-w-md mx-auto bg-cream min-h-screen relative {% block container_padding %}pb-24{% endblock %}">
+  <!-- Container mobile-first, melebar di tablet (md) dan desktop (lg) -->
+  <div class="max-w-md md:max-w-none mx-auto bg-cream min-h-screen relative {% block container_padding %}pb-24{% endblock %}">
 
     {% block header %}{% endblock %}
 

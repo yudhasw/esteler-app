@@ -12,7 +12,7 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
   }
 </style>
 
-<div class="px-4 pt-4">
+<div class="px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
   <a
     href="{{ url_for('admin.order_list') }}"
     class="flex items-center gap-2 text-sm text-gray-600 mb-4"
@@ -25,7 +25,7 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
     Customer datang langsung, input pesanan di sini.
   </p>
 
-  <form method="POST" class="space-y-4">
+  <form method="POST" class="space-y-4 lg:max-w-3xl">
     <div class="bg-white rounded-2xl p-5 shadow-soft space-y-3">
       <h3 class="font-bold text-gray-900">Info Customer</h3>
       <input
@@ -44,7 +44,7 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
 
     <div class="bg-white rounded-2xl p-5 shadow-soft">
       <h3 class="font-bold text-gray-900 mb-3">Metode Pembayaran</h3>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
         {% for pay in [('TUNAI', 'banknote')] %}
         <label class="cursor-pointer">
           <input
@@ -67,8 +67,8 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
 
     <div class="bg-white rounded-2xl p-5 shadow-soft">
       <h3 class="font-bold text-gray-900 mb-3">Pilih Menu</h3>
-      <div class="space-y-2 max-h-96 overflow-y-auto pr-1"> {% for menu in menus %}
-        <div class="flex items-center gap-2 sm:gap-3 p-2 border border-gray-100 rounded-xl">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-3 max-h-96 lg:max-h-[32rem] overflow-y-auto pr-1"> {% for menu in menus %}
+        <div class="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 border border-gray-100 rounded-xl">
           <input type="hidden" name="menu_id[]" value="{{ menu.id }}" />
           
           <img
@@ -87,7 +87,7 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
             <button
               type="button"
               onclick="decrementQty(this)"
-              class="w-7 h-7 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded text-gray-600 transition-colors"
+              class="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded text-gray-600 transition-colors"
             >
               <i data-lucide="minus" class="w-3.5 h-3.5"></i>
             </button>
@@ -99,13 +99,13 @@ block title %}Order Walk-in · Dapur Hijrah{% endblock %} {% block content %}
               min="0"
               max="99"
               readonly
-              class="w-8 text-center text-sm font-bold focus:outline-none hide-number-arrows bg-transparent"
+              class="w-10 text-center text-sm font-bold focus:outline-none hide-number-arrows bg-transparent"
             />
 
             <button
               type="button"
               onclick="incrementQty(this)"
-              class="w-7 h-7 flex items-center justify-center bg-brand-50 hover:bg-brand-100 text-brand-600 rounded transition-colors"
+              class="w-8 h-8 flex items-center justify-center bg-brand-50 hover:bg-brand-100 text-brand-600 rounded transition-colors"
             >
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             </button>

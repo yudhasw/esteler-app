@@ -1,6 +1,6 @@
 {% extends "admin/_layout_admin.html" %} {% set active_nav = 'orders' %} {%
 block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
-<div class="px-4 pt-4">
+<div class="px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
   <!-- Tab Switcher -->
   <div class="flex bg-white rounded-2xl p-1 mb-5 shadow-soft">
     <a
@@ -40,7 +40,7 @@ block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
   
 
   <!-- Active Orders -->
-  <div class="space-y-3 mb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
     {% for order in active_orders %}
     <div class="bg-white rounded-2xl p-4 shadow-soft">
       <div class="flex items-start gap-3 mb-3">
@@ -79,7 +79,7 @@ block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
         </span>
       </div>
 
-      <div class="mb-3 space-y-1">
+      <div class="mb-3 space-y-1.5">
         {% for item in order.items %}
         <div class="flex justify-between text-sm">
           <span class="text-gray-700"
@@ -99,7 +99,7 @@ block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
         </div>
       </div>
 
-      <div class="flex gap-2">
+      <div class="flex gap-2 sm:gap-3">
         {% if order.status == 'menunggu' %}
         <form
           method="POST"
@@ -163,7 +163,7 @@ block title %}Kelola Order · Dapur Hijrah{% endblock %} {% block content %}
       </div>
     </div>
     {% else %}
-    <div class="bg-white rounded-2xl p-8 text-center text-gray-400 shadow-soft">
+    <div class="lg:col-span-2 bg-white rounded-2xl p-8 text-center text-gray-400 shadow-soft">
       <i data-lucide="receipt" class="w-12 h-12 mx-auto mb-2"></i>
       <p class="text-sm">Tidak ada pesanan aktif</p>
     </div>
